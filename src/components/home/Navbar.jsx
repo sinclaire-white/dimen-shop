@@ -22,10 +22,12 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Menu, Package, Heart, HelpCircle, Info } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { LogOut, User, Menu, Package } from 'lucide-react';
+import { signIn, signOut } from 'next-auth/react';
 import ThemeToggle from '../ThemeToggle';
 
 export default function Navbar() {
@@ -33,6 +35,10 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' });
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn('google', { callbackUrl: '/' });
   };
 
   // Dummy categories for products dropdown
@@ -70,11 +76,14 @@ export default function Navbar() {
               <NavigationMenuList>
                 {/* Home */}
                 <NavigationMenuItem>
-                  <Link href="/" legacyBehavior passHref>
-                    <NavigationMenuLink className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                  <NavigationMenuLink asChild>
+                    <Link 
+                      href="/" 
+                      className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                    >
                       Home
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 {/* Products with Dropdown */}
@@ -107,11 +116,14 @@ export default function Navbar() {
                 {/* Other Navigation Items */}
                 {navItems.slice(1).map((item) => (
                   <NavigationMenuItem key={item.href}>
-                    <Link href={item.href} legacyBehavior passHref>
-                      <NavigationMenuLink className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                    <NavigationMenuLink asChild>
+                      <Link 
+                        href={item.href}
+                        className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                      >
                         {item.label}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
@@ -184,6 +196,11 @@ export default function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[240px] sm:w-[300px]">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Main navigation menu for DimenShop
+                </SheetDescription>
+                
                 <div className="flex flex-col space-y-4 mt-8">
                   {/* Mobile Navigation Items */}
                   {navItems.map((item) => (
@@ -243,7 +260,8 @@ export default function Navbar() {
                         </button>
                       </div>
                     ) : (
-                      <div className="flex flex-col space-y-2">
+                      <div className="flex flex-col space-y-3">
+                        <div className="text-sm font-medium text-foreground mb-2">Account</div>
                         <Link href="/signup">
                           <Button variant="outline" className="w-full">
                             Sign Up
@@ -254,6 +272,21 @@ export default function Navbar() {
                             Login
                           </Button>
                         </Link>
+                        <div className="relative my-4">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border" />
+                          </div>
+                          <div className="relative flex justify-center text-xs">
+                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={handleGoogleSignIn}
+                          className="w-full"
+                        >
+                          Continue with Google
+                        </Button>
                       </div>
                     )}
                   </div>

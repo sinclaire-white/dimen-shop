@@ -3,9 +3,29 @@
 import { useThemeStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useThemeStore();
+  const { theme, toggleTheme, initializeTheme, isInitialized } = useThemeStore();
+
+  // Initialize theme on client side only
+  useEffect(() => {
+    initializeTheme();
+  }, [initializeTheme]);
+
+  // Don't render until theme is initialized to avoid hydration mismatch
+  if (!isInitialized) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 rounded-full opacity-0"
+        aria-label="Loading theme"
+      >
+        <Sun className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   return (
     <Button

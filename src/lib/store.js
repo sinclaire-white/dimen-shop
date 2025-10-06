@@ -13,28 +13,33 @@ export const useUserStore = create((set) => ({
 
 // Theme store for dark/light mode
 export const useThemeStore = create((set) => ({
-  theme: 'light',
+  theme: 'light', // Default theme
+  isInitialized: false, // Track if theme is initialized
   setTheme: (theme) => {
-    set({ theme });
-    // Update localStorage and document class
-    localStorage.setItem('theme', theme);
-    document.documentElement.className = theme;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', theme);
+      document.documentElement.className = theme;
+    }
+    set({ theme, isInitialized: true });
   },
   toggleTheme: () => set((state) => {
     const newTheme = state.theme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.className = newTheme;
-    return { theme: newTheme };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+      document.documentElement.className = newTheme;
+    }
+    return { theme: newTheme, isInitialized: true };
   }),
+  initializeTheme: () => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const theme = savedTheme || systemTheme;
+      document.documentElement.className = theme;
+      set({ theme, isInitialized: true });
+    }
+  }
 }));
-
-// Initialize theme from localStorage or system preference
-if (typeof window !== 'undefined') {
-  const savedTheme = localStorage.getItem('theme');
-  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  useThemeStore.setState({ theme: savedTheme || systemTheme });
-  document.documentElement.className = savedTheme || systemTheme;
-}
 
 // Custom hook: Syncs Zustand store with NextAuth session
 export const useSyncedUser = () => {
