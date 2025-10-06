@@ -1,6 +1,5 @@
-
+import AuthProvider from "@/providers/AuthProvider";
 import "./globals.css";
-
 
 export const metadata = {
   title: "Dimen Shop",
@@ -10,9 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-      >
-        {children}
+      <body>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

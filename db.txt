@@ -24,3 +24,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+db_password=Do6FifDamagDDnqc
+db_user=dimenshopDB
