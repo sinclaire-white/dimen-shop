@@ -1,5 +1,6 @@
 import AuthProvider from "@/providers/AuthProvider";
 import "./globals.css";
+import Navbar from "@/components/home/Navbar";
 
 export const metadata = {
   title: "Dimen Shop",
@@ -10,7 +11,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Navbar />
+          {children}
+          
+          </AuthProvider>
       </body>
     </html>
   );
