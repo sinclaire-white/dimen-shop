@@ -1,17 +1,28 @@
 'use client';
 
-import { useThemeStore } from '@/lib/store';
+import { useThemeStore, initializeTheme } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme, initializeTheme, isInitialized } = useThemeStore();
+  const { theme, toggleTheme, isInitialized } = useThemeStore();
 
   // Initialize theme on client side only
   useEffect(() => {
-    initializeTheme();
-  }, [initializeTheme]);
+    if (!isInitialized) {
+      initializeTheme();
+    }
+  }, [isInitialized]);
+
+  const handleToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    toggleTheme();
+    
+    // Update localStorage and document
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.className = newTheme;
+  };
 
   // Don't render until theme is initialized to avoid hydration mismatch
   if (!isInitialized) {
@@ -19,7 +30,7 @@ export default function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-9 w-9 rounded-full opacity-0"
+        className="h-9 w-9 rounded-full"
         aria-label="Loading theme"
       >
         <Sun className="h-4 w-4" />
@@ -31,7 +42,7 @@ export default function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={toggleTheme}
+      onClick={handleToggle}
       className="h-9 w-9 rounded-full"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >

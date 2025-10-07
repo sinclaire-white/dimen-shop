@@ -22,26 +22,27 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetTitle,
-  SheetDescription,
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Menu, Package } from 'lucide-react';
+import { LogOut, User, Menu, Package, Heart } from 'lucide-react';
 import { signIn, signOut } from 'next-auth/react';
 import ThemeToggle from '../ThemeToggle';
 
 export default function Navbar() {
   const { user } = useSyncedUser();
 
+  // Handle user logout with NextAuth
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' });
   };
 
+  // Google OAuth sign-in handler
   const handleGoogleSignIn = () => {
     signIn('google', { callbackUrl: '/' });
   };
 
-  // Dummy categories for products dropdown
+  // PRODUCT CATEGORIES DATA
+  // This can later be fetched from database/API
   const productCategories = [
     { name: '3D Characters', href: '/products/characters', description: 'Animated characters and avatars' },
     { name: 'Environment Packs', href: '/products/environment', description: 'Complete scene environments' },
@@ -51,7 +52,7 @@ export default function Navbar() {
     { name: 'Weapons', href: '/products/weapons', description: 'Guns, swords, and medieval weapons' },
   ];
 
-  // Navigation items for reuse
+  // MAIN NAVIGATION ITEMS
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About Us' },
@@ -63,18 +64,20 @@ export default function Navbar() {
     <nav className="bg-background border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          
+          {/* LOGO SECTION */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-xl font-bold text-primary">
               DimenShop
             </Link>
           </div>
 
-          {/* Desktop Navigation - Hidden on mobile */}
+          {/* DESKTOP NAVIGATION - Hidden on mobile */}
           <div className="hidden md:flex items-center space-x-8">
             <NavigationMenu>
               <NavigationMenuList>
-                {/* Home */}
+                
+                {/* HOME LINK */}
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <Link 
@@ -86,7 +89,7 @@ export default function Navbar() {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                {/* Products with Dropdown */}
+                {/* PRODUCTS DROPDOWN MENU */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-sm font-medium text-foreground hover:text-primary">
                     Products
@@ -113,7 +116,7 @@ export default function Navbar() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Other Navigation Items */}
+                {/* OTHER NAVIGATION ITEMS (About, FAQ, Contact) */}
                 {navItems.slice(1).map((item) => (
                   <NavigationMenuItem key={item.href}>
                     <NavigationMenuLink asChild>
@@ -130,13 +133,14 @@ export default function Navbar() {
             </NavigationMenu>
           </div>
 
-          {/* Desktop User Actions - Hidden on mobile */}
+          {/* DESKTOP USER ACTIONS - Right side of navbar */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Theme Toggle */}
+            {/* THEME TOGGLE SWITCH */}
             <ThemeToggle />
 
-            {/* User or Auth Buttons */}
+            {/* USER PROFILE DROPDOWN OR AUTH BUTTONS */}
             {user ? (
+              // LOGGED IN USER: Show avatar dropdown
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
@@ -161,6 +165,12 @@ export default function Navbar() {
                       <span>Orders</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/favorites" className="flex items-center cursor-pointer">
+                      <Heart className="mr-2 h-4 w-4" />
+                      <span>Favorites</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="flex items-center cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -169,6 +179,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
+              // LOGGED OUT USER: Show sign up/login buttons
               <div className="flex space-x-2">
                 <Link href="/signup">
                   <Button variant="outline" size="sm">
@@ -184,11 +195,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button - Visible only on mobile */}
+          {/* MOBILE MENU - Hamburger menu for small screens */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* Theme Toggle for Mobile */}
+            {/* MOBILE THEME TOGGLE */}
             <ThemeToggle />
 
+            {/* MOBILE SIDEBAR SHEET */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -196,13 +208,9 @@ export default function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[240px] sm:w-[300px]">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Main navigation menu for DimenShop
-                </SheetDescription>
-                
                 <div className="flex flex-col space-y-4 mt-8">
-                  {/* Mobile Navigation Items */}
+                  
+                  {/* MOBILE NAVIGATION LINKS */}
                   {navItems.map((item) => (
                     <Link
                       key={item.href}
@@ -213,53 +221,64 @@ export default function Navbar() {
                     </Link>
                   ))}
 
-                  {/* Products Categories in Mobile */}
-                  <div className="border-l-2 border-primary pl-4">
-                    <div className="text-sm font-semibold text-foreground mb-2">Products</div>
-                    {productCategories.map((category) => (
-                      <Link
-                        key={category.href}
-                        href={category.href}
-                        className="block text-sm text-muted-foreground hover:text-primary py-1 pl-2"
-                      >
-                        {category.name}
-                      </Link>
-                    ))}
+                  {/* MOBILE PRODUCTS SECTION */}
+                  <div className="border-l-2 border-primary pl-4 mt-4">
+                    <Link
+                      href="/products"
+                      className="text-lg font-medium text-primary py-2 block"
+                    >
+                      Products 
+                    </Link>
                   </div>
-                  
-                  {/* Mobile User Section */}
+
+                  {/* MOBILE USER SECTION - Changes based on auth status */}
                   <div className="border-t pt-4 mt-4">
                     {user ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-3 mb-4">
-                          <Avatar className="h-8 w-8">
-                            {user.image && <AvatarImage src={user.image} alt={user.name} />}
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                              {user.name?.charAt(0).toUpperCase() || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">{user.name}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
-                          </div>
+                      // MOBILE LOGGED IN USER VIEW
+                      <div className="flex items-center space-x-3 mb-4">
+                        <Avatar className="h-10 w-10">
+                          {user.image && <AvatarImage src={user.image} alt={user.name} />}
+                          <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                            {user.name?.charAt(0).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6">
+                                Actions
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem asChild>
+                                <Link href="/dashboard" className="flex items-center w-full">
+                                  <User className="mr-2 h-4 w-4" />
+                                  Dashboard
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href="/orders" className="flex items-center w-full">
+                                  <Package className="mr-2 h-4 w-4" />
+                                  Orders
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href="/favorites" className="flex items-center w-full">
+                                  <Heart className="mr-2 h-4 w-4" />
+                                  Favorites
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={handleLogout} className="flex items-center w-full">
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        <Link href="/dashboard" className="flex items-center text-foreground hover:text-primary py-2">
-                          <User className="mr-3 h-4 w-4" />
-                          Dashboard
-                        </Link>
-                        <Link href="/orders" className="flex items-center text-foreground hover:text-primary py-2">
-                          <Package className="mr-3 h-4 w-4" />
-                          Orders
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center text-foreground hover:text-primary w-full py-2"
-                        >
-                          <LogOut className="mr-3 h-4 w-4" />
-                          Logout
-                        </button>
                       </div>
                     ) : (
+                      // MOBILE LOGGED OUT USER VIEW
                       <div className="flex flex-col space-y-3">
                         <div className="text-sm font-medium text-foreground mb-2">Account</div>
                         <Link href="/signup">

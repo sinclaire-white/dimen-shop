@@ -11,34 +11,15 @@ export const useUserStore = create((set) => ({
   setLoading: (loading) => set({ isLoading: loading }),
 }));
 
-// Theme store for dark/light mode
+// Theme store for dark/light mode - completely client-side
 export const useThemeStore = create((set) => ({
-  theme: 'light', // Default theme
-  isInitialized: false, // Track if theme is initialized
-  setTheme: (theme) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
-      document.documentElement.className = theme;
-    }
-    set({ theme, isInitialized: true });
-  },
+  theme: 'light',
+  isInitialized: false,
+  setTheme: (theme) => set({ theme, isInitialized: true }),
   toggleTheme: () => set((state) => {
     const newTheme = state.theme === 'light' ? 'dark' : 'light';
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', newTheme);
-      document.documentElement.className = newTheme;
-    }
     return { theme: newTheme, isInitialized: true };
   }),
-  initializeTheme: () => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      const theme = savedTheme || systemTheme;
-      document.documentElement.className = theme;
-      set({ theme, isInitialized: true });
-    }
-  }
 }));
 
 // Custom hook: Syncs Zustand store with NextAuth session
@@ -65,4 +46,19 @@ export const useSyncedUser = () => {
   }, [status, session, updateUser, clearUser, setLoading]);
 
   return useUserStore();
+};
+
+// Client-side theme initialization
+export const initializeTheme = () => {
+  if (typeof window !== 'undefined') {
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = savedTheme || systemTheme;
+    
+    // Apply theme to document
+    document.documentElement.className = theme;
+    
+    // Initialize store
+    useThemeStore.setState({ theme, isInitialized: true });
+  }
 };
