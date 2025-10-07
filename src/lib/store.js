@@ -20,6 +20,63 @@ export const useThemeStore = create((set) => ({
     const newTheme = state.theme === 'light' ? 'dark' : 'light';
     return { theme: newTheme, isInitialized: true };
   }),
+  initializeTheme: () => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const theme = savedTheme || systemTheme;
+      document.documentElement.className = theme;
+      set({ theme, isInitialized: true });
+    }
+  }
+}));
+
+// Admin Dashboard Store
+export const useAdminStore = create((set) => ({
+  // Analytics Data
+  analytics: {
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalUsers: 0,
+    monthlyGrowth: 0,
+    popularProducts: [],
+    recentOrders: []
+  },
+  // Products Data
+  products: [],
+  // Orders Data  
+  orders: [],
+  // Users Data
+  users: [],
+  
+  // Actions
+  setAnalytics: (analytics) => set({ analytics }),
+  setProducts: (products) => set({ products }),
+  setOrders: (orders) => set({ orders }),
+  setUsers: (users) => set({ users }),
+  
+  // Fetch all dashboard data
+  fetchDashboardData: async () => {
+    try {
+      // Simulate API calls - replace with actual endpoints
+      const analyticsRes = await fetch('/api/admin/analytics');
+      const productsRes = await fetch('/api/admin/products');
+      const ordersRes = await fetch('/api/admin/orders');
+      const usersRes = await fetch('/api/admin/users');
+      
+      const [analytics, products, orders, users] = await Promise.all([
+        analyticsRes.json(),
+        productsRes.json(),
+        ordersRes.json(),
+        usersRes.json()
+      ]);
+      
+      set({ analytics, products, orders, users });
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    }
+  }
 }));
 
 // Custom hook: Syncs Zustand store with NextAuth session

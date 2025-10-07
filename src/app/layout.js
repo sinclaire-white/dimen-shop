@@ -1,6 +1,6 @@
 import AuthProvider from "@/providers/AuthProvider";
 import "./globals.css";
-import Navbar from "@/components/home/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import ThemeProvider from "@/providers/ThemeProvider";
 import ToasterProvider from "@/providers/ToastProvider";
 
