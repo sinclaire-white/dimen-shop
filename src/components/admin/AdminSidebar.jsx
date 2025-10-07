@@ -8,12 +8,13 @@ import {
   Package, 
   ShoppingCart, 
   Users,
-  Settings 
+  Tags 
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/dashboard/products', icon: Package },
+   { name: 'Categories', href: '/dashboard/categories', icon: Tags },
   { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
   { name: 'Users', href: '/dashboard/users', icon: Users },
 ];

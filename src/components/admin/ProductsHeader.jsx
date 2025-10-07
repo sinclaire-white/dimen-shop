@@ -1,9 +1,8 @@
-// src/components/admin/ProductsHeader.jsx
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export function ProductsHeader() {
   return (
@@ -14,10 +13,12 @@ export function ProductsHeader() {
           Manage your 3D model products and inventory
         </p>
       </div>
-      <Button>
-        <Plus className="mr-2 h-4 w-4" />
-        Add Product
-      </Button>
+      <Link href="/dashboard/products/add">
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Product
+        </Button>
+      </Link>
     </div>
   );
 }
