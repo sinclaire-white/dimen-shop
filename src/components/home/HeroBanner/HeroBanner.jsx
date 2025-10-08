@@ -10,10 +10,8 @@ export default function HeroBanner() {
         <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-center text-foreground font-sans tracking-tight mb-6">
           Bring Imagination to Life
           <div className="relative mx-auto inline-block w-max">
-            <div className="absolute left-0 top-[1px] bg-clip-text text-transparent bg-gradient-to-r py-4 from-primary via-primary-foreground to-accent [text-shadow:0_0_rgba(0,0,0,0.1)]">
-              <span>with 3D Prints</span>
-            </div>
-            <div className="relative bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary-foreground to-accent py-4">
+           
+            <div className="py-4">
               <span>with 3D Prints</span>
             </div>
           </div>

@@ -1,8 +1,11 @@
+// lib/store.js: Global state management with Zustand (user, theme, admin dashboard, categories)
+
 import { create } from 'zustand';
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';  
+import { useEffect } from 'react';
+import axios from 'axios';
 
-// Core Zustand store: Holds user data and actions
+// User store section
 export const useUserStore = create((set) => ({
   user: null,
   isLoading: true,
@@ -11,7 +14,7 @@ export const useUserStore = create((set) => ({
   setLoading: (loading) => set({ isLoading: loading }),
 }));
 
-// Theme store for dark/light mode - completely client-side
+// Theme store section (client-side only)
 export const useThemeStore = create((set) => ({
   theme: 'light',
   isInitialized: false,
@@ -31,9 +34,9 @@ export const useThemeStore = create((set) => ({
   }
 }));
 
-// Admin Dashboard Store
+// Admin store section
 export const useAdminStore = create((set) => ({
-  // Analytics Data
+  // Analytics data
   analytics: {
     totalRevenue: 0,
     totalOrders: 0,
@@ -43,43 +46,79 @@ export const useAdminStore = create((set) => ({
     popularProducts: [],
     recentOrders: []
   },
-  // Products Data
+  // Products data
   products: [],
-  // Orders Data  
+  // Orders data
   orders: [],
-  // Users Data
+  // Users data
   users: [],
-  
-  // Actions
+  // Categories data
+  categories: [],
+  setCategories: (categories) => set({ categories }),
+  fetchCategories: async () => {
+    try {
+      const res = await axios.get('/api/categories');
+      set({ categories: res.data });
+    } catch (error) {
+      console.error('Failed to fetch categories:', error); // Log fetch failure
+    }
+  },
+  addCategory: async (newCategory) => {
+    try {
+      const res = await axios.post('/api/categories', newCategory);
+      set((state) => ({ categories: [...state.categories, res.data] }));
+    } catch (error) {
+      console.error('Failed to add category:', error); // Log add failure
+    }
+  },
+  deleteCategory: async (id) => {
+    try {
+      await axios.delete('/api/categories', { data: { id } });
+      set((state) => ({
+        categories: state.categories.filter(cat => cat.id !== id)
+      }));
+    } catch (error) {
+      console.error('Failed to delete category:', error); // Log delete failure
+    }
+  },
+  updateCategory: async (updatedCategory) => {
+    try {
+      const res = await axios.put('/api/categories', updatedCategory);
+      set((state) => ({
+        categories: state.categories.map(cat => 
+          cat.id === updatedCategory.id ? res.data : cat
+        )
+      }));
+    } catch (error) {
+      console.error('Failed to update category:', error); // Log update failure
+    }
+  },
+  // Actions for other data
   setAnalytics: (analytics) => set({ analytics }),
   setProducts: (products) => set({ products }),
   setOrders: (orders) => set({ orders }),
   setUsers: (users) => set({ users }),
-  
-  // Fetch all dashboard data
   fetchDashboardData: async () => {
     try {
-      // Simulate API calls - replace with actual endpoints
-      const analyticsRes = await fetch('/api/admin/analytics');
-      const productsRes = await fetch('/api/admin/products');
-      const ordersRes = await fetch('/api/admin/orders');
-      const usersRes = await fetch('/api/admin/users');
-      
-      const [analytics, products, orders, users] = await Promise.all([
-        analyticsRes.json(),
-        productsRes.json(),
-        ordersRes.json(),
-        usersRes.json()
+      const [analyticsRes, productsRes, ordersRes, usersRes] = await Promise.all([
+        axios.get('/api/admin/analytics'),
+        axios.get('/api/admin/products'),
+        axios.get('/api/admin/orders'),
+        axios.get('/api/admin/users')
       ]);
-      
-      set({ analytics, products, orders, users });
+      set({
+        analytics: analyticsRes.data,
+        products: productsRes.data,
+        orders: ordersRes.data,
+        users: usersRes.data
+      });
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error('Failed to fetch dashboard data:', error); // Log dashboard fetch failure
     }
   }
 }));
 
-// Custom hook: Syncs Zustand store with NextAuth session
+// Session sync hook
 export const useSyncedUser = () => {
   const { data: session, status } = useSession();
   const { updateUser, clearUser, setLoading } = useUserStore();
@@ -105,17 +144,14 @@ export const useSyncedUser = () => {
   return useUserStore();
 };
 
-// Client-side theme initialization
+// Client-side theme init
 export const initializeTheme = () => {
   if (typeof window !== 'undefined') {
     const savedTheme = localStorage.getItem('theme');
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     const theme = savedTheme || systemTheme;
     
-    // Apply theme to document
     document.documentElement.className = theme;
-    
-    // Initialize store
     useThemeStore.setState({ theme, isInitialized: true });
   }
 };

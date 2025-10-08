@@ -5,8 +5,8 @@ import ThemeProvider from "@/providers/ThemeProvider";
 import ToasterProvider from "@/providers/ToastProvider";
 
 export const metadata = {
-  title: "Dimen Shop",
-  description: "Get your desired 3D printed products",
+  title: 'DimenShop - Premium 3D Models Marketplace',
+  description: 'Discover high-quality 3D models for games, architecture, animation, and 3D printing. Premium digital assets from trusted creators.',
 };
 
 export default function RootLayout({ children }) {

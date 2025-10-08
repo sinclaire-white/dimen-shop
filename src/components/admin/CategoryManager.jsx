@@ -1,118 +1,145 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAdminStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
-export function CategoryManager({ initialCategories }) {
-  const [categories, setCategories] = useState(initialCategories);
-  const [newCategory, setNewCategory] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [editName, setEditName] = useState('');
+// Form component extracted to keep client-side logic separate
+function CategoryForm({ formData, setFormData, editMode, handleSubmit, setOpen, setEditMode }) {
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0, opacity: 0 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+    >
+      <DialogHeader>
+        <DialogTitle>{editMode ? 'Edit Category' : 'Add New Category'}</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+        </div>
+        <Button type="submit" className="w-full">{editMode ? 'Save' : 'Add'}</Button>
+      </form>
+    </motion.div>
+  );
+}
 
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      const newCat = {
-        id: Date.now().toString(),
-        name: newCategory.trim(),
-        productCount: 0,
-      };
-      setCategories(prev => [...prev, newCat]);
-      setNewCategory('');
+export function CategoryManager() {
+  const { categories, fetchCategories, addCategory, deleteCategory, updateCategory } = useAdminStore();
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({ id: '', name: '', description: '' });
+  const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editMode) {
+      updateCategory(formData);
+      toast.success('Category updated!');
+    } else {
+      addCategory({ name: formData.name, description: formData.description });
+      toast.success('Category added!');
+    }
+    setOpen(false);
+    setFormData({ id: '', name: '', description: '' });
+    setEditMode(false);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('Are you sure you want to delete this category?')) {
+      deleteCategory(id);
+      toast.success('Category deleted!');
     }
   };
 
-  const handleDeleteCategory = (id) => {
-    setCategories(prev => prev.filter(cat => cat.id !== id));
-  };
-
-  const startEditing = (category) => {
-    setEditingId(category.id);
-    setEditName(category.name);
-  };
-
-  const saveEdit = () => {
-    if (editName.trim()) {
-      setCategories(prev =>
-        prev.map(cat =>
-          cat.id === editingId ? { ...cat, name: editName.trim() } : cat
-        )
-      );
-      setEditingId(null);
-      setEditName('');
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditName('');
+  const handleEdit = (category) => {
+    setFormData({ id: category.id, name: category.name, description: category.description });
+    setEditMode(true);
+    setOpen(true);
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {/* Add Category Section */}
-      <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-semibold mb-4">Add New Category</h3>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="categoryName">Category Name</Label>
-            <Input
-              id="categoryName"
-              placeholder="e.g., Furniture, Electronics"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-foreground">Categories</h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              {editMode ? 'Edit Category' : 'Add Category'}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <CategoryForm
+              formData={formData}
+              setFormData={setFormData}
+              editMode={editMode}
+              handleSubmit={handleSubmit}
+              setOpen={setOpen}
+              setEditMode={setEditMode}
             />
-          </div>
-          <Button onClick={handleAddCategory} className="w-full">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Category
-          </Button>
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Categories List Section */}
-      <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-semibold mb-4">Existing Categories</h3>
-        <div className="space-y-3">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
-              {editingId === category.id ? (
-                <div className="flex items-center gap-2 flex-1">
-                  <Input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button size="sm" onClick={saveEdit}>
-                    Save
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={cancelEdit}>
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex-1">
-                    <h4 className="font-medium">{category.name}</h4>
-                    <p className="text-sm text-muted-foreground">{category.productCount} products</p>
-                  </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Manage Categories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => (
+              <div
+                key={category._id}
+                className="border rounded-lg p-4 bg-background hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-foreground">{category.name}</h3>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => startEditing(category)}>
+                    <button onClick={() => handleEdit(category)} className="text-blue-500 hover:text-blue-700">
                       <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteCategory(category.id)}>
+                    </button>
+                    <button onClick={() => handleDelete(category.id)} className="text-red-500 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </button>
                   </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{category.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  Created: {new Date(category.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
