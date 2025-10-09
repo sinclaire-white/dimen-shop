@@ -20,6 +20,7 @@ import {
   File
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function ProductPage() {
   const params = useParams();
@@ -84,7 +85,7 @@ export default function ProductPage() {
       <div className="min-h-screen bg-background py-8">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h1>
-          <p className="text-muted-foreground mb-6">The product you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-6">The product you&#39;re looking for doesn&#39;t exist.</p>
           <Button asChild>
             <Link href="/products">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -115,7 +116,7 @@ export default function ProductPage() {
             <Card>
               <CardContent className="p-0">
                 <div className="aspect-square overflow-hidden rounded-lg">
-                  <img
+                  <Image
                     src={product.images?.[selectedImage] || '/api/placeholder/600/600'}
                     alt={product.name}
                     className="w-full h-full object-cover"
@@ -138,7 +139,7 @@ export default function ProductPage() {
                         : "border-transparent hover:border-muted-foreground"
                     )}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
@@ -309,7 +310,7 @@ export default function ProductPage() {
                   <CardContent className="p-0">
                     <Link href={`/products/${relatedProduct._id}`}>
                       <div className="aspect-square overflow-hidden">
-                        <img
+                        <Image
                           src={relatedProduct.images?.[0] || '/api/placeholder/400/400'}
                           alt={relatedProduct.name}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"

@@ -109,7 +109,7 @@ export default function CategoryPage() {
       <div className="min-h-screen bg-background py-8">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Category Not Found</h1>
-          <p className="text-muted-foreground mb-6">The category you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-6">The category you&#39;re looking for doesn&#39;t exist.</p>
           <Button asChild>
             <Link href="/products">
               <ArrowLeft className="w-4 h-4 mr-2" />

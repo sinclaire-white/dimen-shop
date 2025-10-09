@@ -1,6 +1,7 @@
 
+import { AnalyticsCharts } from '@/components/admin/AnalyticsCharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import AdminAnalyticsClient from '@/components/AdminAnalyticsClient';
+
 
 const dummyData = [
   { month: 'Jan', sales: 400, users: 120 },
@@ -57,7 +58,7 @@ export default function Overview() {
           <CardTitle>Sales Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <AdminAnalyticsClient data={dummyData} />
+          <AnalyticsCharts />
         </CardContent>
       </Card>
     </div>
