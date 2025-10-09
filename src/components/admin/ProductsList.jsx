@@ -1,21 +1,20 @@
-'use client';
+"use client";
 
+import { useEffect, useState } from "react";
+import { useAdminStore } from "@/lib/store";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { LoaderFour } from "@/components/ui/loader";
+import { toast } from "sonner";
 
-import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/lib/store';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
-import { LoaderFour } from '@/components/ui/loader';
-import { toast } from 'sonner';
-
-import Link from 'next/link';
+import Link from "next/link";
 
 export function ProductsList() {
   // Zustand store for fetching and deleting products, with loading state
   const { products, fetchProducts, deleteProduct, loading } = useAdminStore();
   // State for search filtering
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch products on component mount
   useEffect(() => {
@@ -23,22 +22,23 @@ export function ProductsList() {
   }, [fetchProducts]);
 
   // Filter products based on search term
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle product deletion with confirmation
-  const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+  const handleDelete = async (product) => {
+    if (confirm("Are you sure you want to delete this product?")) {
       try {
-        // Delete product via Zustand action
-        await deleteProduct(id);
-        // Show success notification
-        toast.success('Product deleted successfully!');
+        // Use _id for MongoDB, id for the UI
+        const idToDelete = product._id || product.id;
+        await deleteProduct(idToDelete);
+        toast.success("Product deleted successfully!");
       } catch (error) {
-        // Show error notification if deletion fails
-        toast.error('Failed to delete product');
+        console.error("Delete error:", error);
+        toast.error("Failed to delete product");
       }
     }
   };
@@ -56,7 +56,9 @@ export function ProductsList() {
       {/* Fallback: Show message and link when no products */}
       {!loading && filteredProducts.length === 0 && (
         <div className="text-center py-12">
-          <h3 className="text-lg font-semibold text-foreground dark:text-foreground">No products added</h3>
+          <h3 className="text-lg font-semibold text-foreground dark:text-foreground">
+            No products added
+          </h3>
           <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-2">
             Start by adding your first product!
           </p>
@@ -71,7 +73,10 @@ export function ProductsList() {
         <div className="grid gap-4">
           {filteredProducts.map((product) => (
             // Card for each product, theme-sensitive
-            <Card key={product._id} className="bg-background dark:bg-background border-muted dark:border-muted">
+            <Card
+              key={product._id}
+              className="bg-background dark:bg-background border-muted dark:border-muted"
+            >
               {/* Responsive layout: column on mobile, row on larger screens */}
               <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center space-x-4">
@@ -88,7 +93,9 @@ export function ProductsList() {
                     </div>
                   )}
                   <div>
-                    <h3 className="font-semibold text-foreground dark:text-foreground">{product.name}</h3>
+                    <h3 className="font-semibold text-foreground dark:text-foreground">
+                      {product.name}
+                    </h3>
                     <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                       {product.category} • ${product.price}
                     </p>
@@ -106,7 +113,11 @@ export function ProductsList() {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(product.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(product)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
