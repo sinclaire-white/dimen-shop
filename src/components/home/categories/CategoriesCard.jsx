@@ -10,14 +10,6 @@ export function CategoriesCard({ categories }) {
     visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
   };
 
-  // Function to make category name URL-friendly
-  const formatCategoryName = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, ''); // Remove special characters
-  };
-
   return (
     <section className="py-8 bg-background dark:bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,7 +36,7 @@ export function CategoriesCard({ categories }) {
               animate="visible"
               transition={{ delay: index * 0.1 }}
             >
-              <Link href={`/categories/${formatCategoryName(category.name)}`}>
+              <Link href={`/categories/${category._id}`}>
                 <Card className="bg-background dark:bg-background border border-muted dark:border-muted hover:bg-muted/50 dark:hover:bg-muted/50 transition-colors">
                   <CardHeader>
                     <CardTitle className="text-lg font-medium text-foreground dark:text-foreground">
