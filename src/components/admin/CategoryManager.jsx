@@ -132,9 +132,7 @@ export function CategoryManager() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">{category.description}</p>
-                <p className="text-xs text-muted-foreground">
-                  Created: {new Date(category.createdAt).toLocaleDateString()}
-                </p>
+                
               </div>
             ))}
           </div>
