@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Calendar, Shield, Package, Heart, ShoppingCart, TrendingUp } from 'lucide-react';
+import { User, Mail, Calendar, Shield, Package, Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UserOverview() {
@@ -223,31 +223,6 @@ export default function UserOverview() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Recent Activity Section - can be expanded later */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.6 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Your latest orders and activity on DimenShop.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No recent activity to show.</p>
-              <Button variant="outline" className="mt-4" asChild>
-                <Link href="/products">Start Shopping</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   );
 }

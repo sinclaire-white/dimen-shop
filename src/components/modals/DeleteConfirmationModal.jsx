@@ -51,10 +51,19 @@ export default function DeleteConfirmationModal({
             variant="destructive"
             onClick={onConfirm}
             disabled={isLoading}
-            className="gap-2"
+            className="gap-2 text-white font-medium"
           >
-            <Trash2 className="h-4 w-4" />
-            {isLoading ? 'Deleting...' : confirmText}
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span>Deleting...</span>
+              </div>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" />
+                {confirmText}
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

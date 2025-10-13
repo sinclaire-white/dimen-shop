@@ -4,13 +4,10 @@
 
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BorderBeam } from '@/components/ui/border-beam';
 import Link from 'next/link';
 
 export function CategoriesCard({ categories }) {
-  const cardVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
-  };
 
   return (
     <section className="py-8 bg-background dark:bg-background">
@@ -30,16 +27,10 @@ export function CategoriesCard({ categories }) {
         </motion.div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category, index) => (
-            <motion.div
-              key={category._id}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: index * 0.1 }}
-            >
+          {categories.map((category) => (
+            <div key={category._id}>
               <Link href={`/categories/${category._id}`}>
-                <Card className="bg-background dark:bg-background border border-muted dark:border-muted hover:bg-muted/50 dark:hover:bg-muted/50 transition-colors">
+                <Card className="relative bg-background dark:bg-background border border-muted dark:border-muted hover:bg-muted/50 dark:hover:bg-muted/50 transition-colors overflow-hidden">
                   <CardHeader>
                     <CardTitle className="text-lg font-medium text-foreground dark:text-foreground">
                       {category.name}
@@ -50,9 +41,10 @@ export function CategoriesCard({ categories }) {
                       {category.description}
                     </p>
                   </CardContent>
+                  <BorderBeam duration={8} size={100} />
                 </Card>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -288,7 +288,14 @@ export default function AdminOrdersPage() {
                                 onClick={() => updateOrderStatus(order._id, 'confirmed')}
                                 disabled={isUpdating}
                               >
-                                {isUpdating ? 'Updating...' : 'Confirm'}
+                                {isUpdating ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    <span>Updating...</span>
+                                  </div>
+                                ) : (
+                                  'Confirm'
+                                )}
                               </Button>
                               <Button
                                 variant="destructive"
@@ -297,8 +304,17 @@ export default function AdminOrdersPage() {
                                 disabled={isUpdating}
                                 className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
                               >
-                                <XCircle className="w-4 h-4 mr-1 text-white" />
-                                {isUpdating ? 'Updating...' : 'Decline'}
+                                {isUpdating ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    <span>Updating...</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <XCircle className="w-4 h-4 mr-1 text-white" />
+                                    Decline
+                                  </>
+                                )}
                               </Button>
                             </>
                           )}
@@ -310,7 +326,14 @@ export default function AdminOrdersPage() {
                                 onClick={() => updateOrderStatus(order._id, 'processing')}
                                 disabled={isUpdating}
                               >
-                                {isUpdating ? 'Updating...' : 'Process'}
+                                {isUpdating ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    <span>Updating...</span>
+                                  </div>
+                                ) : (
+                                  'Process'
+                                )}
                               </Button>
                               <Button
                                 variant="destructive"
@@ -319,8 +342,17 @@ export default function AdminOrdersPage() {
                                 disabled={isUpdating}
                                 className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
                               >
-                                <XCircle className="w-4 h-4 mr-1 text-white" />
-                                {isUpdating ? 'Updating...' : 'Decline'}
+                                {isUpdating ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    <span>Updating...</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <XCircle className="w-4 h-4 mr-1 text-white" />
+                                    Decline
+                                  </>
+                                )}
                               </Button>
                             </>
                           )}
@@ -331,7 +363,14 @@ export default function AdminOrdersPage() {
                               onClick={() => updateOrderStatus(order._id, 'shipped')}
                               disabled={isUpdating}
                             >
-                              {isUpdating ? 'Updating...' : 'Ship'}
+                              {isUpdating ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                  <span>Updating...</span>
+                                </div>
+                              ) : (
+                                'Ship'
+                              )}
                             </Button>
                           )}
                           

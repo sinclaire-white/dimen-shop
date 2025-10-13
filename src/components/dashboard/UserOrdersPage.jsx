@@ -202,8 +202,17 @@ export default function UserOrdersPage() {
                           disabled={cancellingOrder === order._id || isLoading}
                           className="bg-red-600 hover:bg-red-700 text-white border-red-600 shrink-0 font-medium"
                         >
-                          <XCircle className="w-4 h-4 mr-1 text-white" />
-                          {cancellingOrder === order._id ? 'Cancelling...' : 'Cancel Order'}
+                          {cancellingOrder === order._id ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                              <span>Cancelling...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <XCircle className="w-4 h-4 mr-1 text-white" />
+                              Cancel Order
+                            </>
+                          )}
                         </Button>
                       )}
                     </div>

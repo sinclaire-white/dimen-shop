@@ -1,6 +1,9 @@
 // components/HeroBanner
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
+import { ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import AnimatedWrapper from './AnimatedWrapper'; 
 
 export default function HeroBanner() {
@@ -21,14 +24,54 @@ export default function HeroBanner() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
           <Link href="/products" className="flex-1">
-            <Button size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-              Shop Now
-            </Button>
+            <div className="group relative mx-auto flex items-center justify-center rounded-full px-4 sm:px-6 py-2.5 sm:py-3 bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-500 ease-out border border-gray-200 dark:border-gray-300">
+              <span
+                className={cn(
+                  "animate-gradient absolute inset-0 block h-full w-full rounded-[inherit] bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:300%_100%] p-[3px] dark:p-[4px]"
+                )}
+                style={{
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "destination-out",
+                  mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  maskComposite: "subtract",
+                  WebkitClipPath: "padding-box",
+                }}
+              />
+              <AnimatedGradientText 
+                className="text-sm sm:text-base font-semibold"
+                colorFrom="#ffaa40"
+                colorTo="#9c40ff"
+              >
+                Shop Now
+              </AnimatedGradientText>
+              <ChevronRight className="ml-2 size-3 sm:size-4 stroke-gray-600 dark:stroke-gray-600 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+            </div>
           </Link>
           <Link href="/about" className="flex-1">
-            <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-accent">
-              Learn More
-            </Button>
+            <div className="group relative mx-auto flex items-center justify-center rounded-full px-4 sm:px-6 py-2.5 sm:py-3 bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-500 ease-out border border-gray-300 dark:border-gray-600">
+              <span
+                className={cn(
+                  "animate-gradient absolute inset-0 block h-full w-full rounded-[inherit] bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#6366f1] bg-[length:300%_100%] p-[3px] dark:p-[4px]"
+                )}
+                style={{
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "destination-out",
+                  mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  maskComposite: "subtract",
+                  WebkitClipPath: "padding-box",
+                }}
+              />
+              <AnimatedGradientText 
+                className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200"
+                colorFrom="#6366f1"
+                colorTo="#8b5cf6"
+              >
+                Learn More
+              </AnimatedGradientText>
+              <ChevronRight className="ml-2 size-3 sm:size-4 stroke-gray-600 dark:stroke-gray-400 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+            </div>
           </Link>
         </div>
       </div>

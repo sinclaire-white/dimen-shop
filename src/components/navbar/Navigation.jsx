@@ -7,6 +7,8 @@ import { useSyncedUser } from '@/lib/store';
 import { signIn, signOut } from 'next-auth/react';
 import ThemeToggle from '../ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { ShinyButton } from '@/components/ui/shiny-button';
+import { LogoutConfirmDialog } from '@/components/ui/logout-confirm-dialog';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -49,6 +51,8 @@ export default function Navigation({ categories }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -58,8 +62,20 @@ export default function Navigation({ categories }) {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+  const handleLogout = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut({ callbackUrl: '/' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+      setLogoutDialogOpen(false);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -347,14 +363,14 @@ export default function Navigation({ categories }) {
         ) : (
           <div className="flex space-x-2">
             <Link href="/signup">
-              <Button variant="outline" size="sm">
+              <ShinyButton variant="outline" size="sm">
                 Sign Up
-              </Button>
+              </ShinyButton>
             </Link>
             <Link href="/login">
-              <Button size="sm">
+              <ShinyButton size="sm">
                 Login
-              </Button>
+              </ShinyButton>
             </Link>
           </div>
         )}
@@ -573,12 +589,12 @@ export default function Navigation({ categories }) {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Button asChild className="w-full" onClick={handleMobileLinkClick}>
+                    <ShinyButton asChild className="w-full" onClick={handleMobileLinkClick}>
                       <Link href="/login">Login</Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full" onClick={handleMobileLinkClick}>
+                    </ShinyButton>
+                    <ShinyButton asChild variant="outline" className="w-full" onClick={handleMobileLinkClick}>
                       <Link href="/signup">Sign Up</Link>
-                    </Button>
+                    </ShinyButton>
                     <div className="relative my-2">
                       <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-border" />
@@ -598,6 +614,14 @@ export default function Navigation({ categories }) {
           </SheetContent>
         </Sheet>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmDialog
+        open={logoutDialogOpen}
+        onOpenChange={setLogoutDialogOpen}
+        onConfirm={confirmLogout}
+        isLoading={isLoggingOut}
+      />
     </>
   );
 }

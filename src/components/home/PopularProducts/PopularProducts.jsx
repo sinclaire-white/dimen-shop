@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useProductStore } from '@/lib/store';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { Card, CardContent } from '@/components/ui/card';
+import { StarButton } from '@/components/ui/star-button';
 import { TrendingUp } from 'lucide-react';
 
 export function PopularProducts() {
@@ -17,7 +18,7 @@ export function PopularProducts() {
 
   if (loading) {
     return (
-      <section className="py-16 bg-muted/30">
+      <section className="mt-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="h-8 bg-muted animate-pulse rounded-md w-64 mx-auto mb-4" />
@@ -42,7 +43,7 @@ export function PopularProducts() {
 
   if (!popularProducts || popularProducts.length === 0) {
     return (
-      <section className="py-16 bg-muted/30">
+      <section className="mt-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-4">
             <TrendingUp className="h-6 w-6 text-muted-foreground mr-2" />
@@ -79,7 +80,7 @@ export function PopularProducts() {
   };
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="mt-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -127,11 +128,10 @@ export function PopularProducts() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-center mt-12"
         >
-          <a
-            href="/products"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors duration-200"
-          >
-            View All Products
+          <a href="/products">
+            <StarButton>
+              View All Products
+            </StarButton>
           </a>
         </motion.div>
       </div>

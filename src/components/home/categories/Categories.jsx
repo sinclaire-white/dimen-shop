@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+import { BorderBeam } from '@/components/ui/border-beam';
 import { Package } from 'lucide-react';
 
 async function fetchCategories() {
@@ -20,7 +21,7 @@ export default async function Categories() {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">Browse Categories</h2>
@@ -32,7 +33,7 @@ export default async function Categories() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
             <Link key={category._id} href={`/categories/${category._id}`}>
-              <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer h-full">
+              <Card className="relative group hover:shadow-lg transition-all duration-300 cursor-pointer h-full overflow-hidden">
                 <CardContent className="p-6 text-center h-full flex flex-col">
                   <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                     <Package className="w-8 h-8 text-primary" />
@@ -44,6 +45,7 @@ export default async function Categories() {
                     {category.description || `Explore ${category.name} models`}
                   </p>
                 </CardContent>
+                <BorderBeam duration={8} size={100} />
               </Card>
             </Link>
           ))}

@@ -1,11 +1,20 @@
 'use client';  
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';  // Form library for state/validation
 import { zodResolver } from '@hookform/resolvers/zod';  // Zod integration (JS-only)
 import { z } from 'zod';  // Zod for schema validation
 import { useRouter } from 'next/navigation';  // For client-side redirects
 import { signIn } from 'next-auth/react';  // For auto-login after sign-up
 import { useSyncedUser } from '@/lib/store';  // Global user state
+import Link from 'next/link';
 import axios from 'axios';  // For API requests (replaces fetch)
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ShineBorder } from '@/components/ui/shine-border';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 // Zod schema: Defines/validates form shape (matches server)
 const signUpSchema = z.object({
@@ -20,6 +29,8 @@ const signUpSchema = z.object({
 
 // Main sign-up component
 export default function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();  // Router for navigation
   const { setLoading } = useSyncedUser();  // Global loading from Zustand
 
@@ -42,6 +53,8 @@ export default function SignUp() {
 
   // Form submission handler
   const onSubmit = async (data) => {
+    setIsLoading(true);
+    setError('');
     // Show global loading during API call
     setLoading(true);
     try {
@@ -65,97 +78,165 @@ export default function SignUp() {
         router.push('/');  // Redirect to home/dashboard
       } else {
         // Rare edge case: Sign-up worked but login failed
-        alert('Sign-up successful, but login failed. Please try signing in.');
+        setError('Account created but login failed. Please try logging in manually.');
       }
     } catch (error) {
       // Handle API/Zod errors
       if (error.response?.status === 400) {
-        alert(error.response.data.error || 'Invalid input');
+        setError(error.response.data.error || 'Invalid input');
       } else if (error.response?.status === 409) {
-        alert('User already exists');
+        setError('User already exists');
       } else {
         // Network/other errors
         console.error('Sign-up error:', error);
-        alert('An unexpected error occurred.');
+        setError('An unexpected error occurred.');
       }
     } finally {
       // Always stop loading
+      setIsLoading(false);
       setLoading(false);
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn('google', { callbackUrl: '/' });
+    } catch (error) {
+      setError('Failed to sign in with Google');
+      console.error('Google sign-in error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Page header */}
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">Join our e-commerce community</p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block">
+            <h1 className="text-3xl font-bold text-primary">DimenShop</h1>
+            <p className="text-sm text-muted-foreground mt-2">3D Models Marketplace</p>
+          </Link>
         </div>
-        {/* Form: Uses Tailwind for styling */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            {/* Name Input: Zod validates via resolver */}
-            <div>
-              <input
-                type="text"
-                placeholder="Full Name"
-                {...register('name')}
-                className={`appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-              />
-              {/* Error display: Auto from Zod */}
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+
+        <Card className="relative w-full max-w-md mx-auto overflow-hidden">
+          <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center text-foreground">
+              Create Account
+            </CardTitle>
+            <CardDescription className="text-center text-muted-foreground">
+              Join our 3D printing community today
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-destructive/15 border border-destructive text-destructive px-4 py-3 rounded-md">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    {...register('name')}
+                    className={errors.name ? 'border-destructive' : ''}
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-destructive">{errors.name.message}</p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    {...register('email')}
+                    className={errors.email ? 'border-destructive' : ''}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a password"
+                    {...register('password')}
+                    className={errors.password ? 'border-destructive' : ''}
+                  />
+                  {errors.password && (
+                    <p className="text-sm text-destructive">{errors.password.message}</p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    {...register('confirmPassword')}
+                    className={errors.confirmPassword ? 'border-destructive' : ''}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                  )}
+                </div>
+              </div>
+              <ShinyButton 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full disabled:opacity-50 font-medium"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span>Creating Account...</span>
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
+              </ShinyButton>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
             </div>
-            {/* Email: Zod validates format */}
-            <div>
-              <input
-                type="email"
-                placeholder="Email"
-                {...register('email')}
-                className={`appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-            </div>
-            {/* Password: Zod min length */}
-            <div>
-              <input
-                type="password"
-                placeholder="Password"
-                {...register('password')}
-                className={`appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-              />
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
-            </div>
-            {/* Confirm Password: Zod refine for match */}
-            <div>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                {...register('confirmPassword')}
-                className={`appearance-none rounded-md relative block w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-              />
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>}
-            </div>
-          </div>
-          {/* Submit Button: Disabled during submission to prevent duplicates */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Creating...' : 'Sign Up'}
-          </button>
-        </form>
-        {/* Google OAuth Button: Triggers NextAuth sign-in flow */}
-        <div className="mt-6">
-          <button
-            type="button"
-            onClick={() => signIn('google', { callbackUrl: '/' })}  // Redirects to home after success
-            className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-          >
-            Sign up with Google
-          </button>
-        </div>
+
+            <ShinyButton
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+              className="w-full font-medium"
+            >
+              Sign up with Google
+            </ShinyButton>
+
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link href="/login" className="underline underline-offset-4 hover:text-primary">
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
