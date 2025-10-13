@@ -9,14 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { User, Mail, Calendar, Shield, Edit, Save, X } from 'lucide-react';
+import { User, Mail, Calendar, Shield, Edit, Save, X, Phone, MapPin, Camera } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, updateUser } = useSyncedUser();
+  const { user, updateProfile } = useSyncedUser();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    address: '',
+    profileImage: null,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,6 +28,9 @@ export default function ProfilePage() {
       setFormData({
         name: user.name || '',
         email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        profileImage: null,
       });
     }
   }, [user]);
@@ -43,25 +49,12 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-        updateUser(updatedUser);
-        setIsEditing(false);
-        toast.success('Profile updated successfully');
-      } else {
-        throw new Error('Failed to update profile');
-      }
+      await updateProfile(formData);
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +64,9 @@ export default function ProfilePage() {
     setFormData({
       name: user?.name || '',
       email: user?.email || '',
+      phone: user?.phone || '',
+      address: user?.address || '',
+      profileImage: null,
     });
     setIsEditing(false);
   };
@@ -95,7 +91,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="max-w-2xl">
         {/* Profile Information */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -143,6 +139,38 @@ export default function ProfilePage() {
               {/* Profile Form */}
               {isEditing ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Profile Image Upload */}
+                  <div className="space-y-2">
+                    <Label htmlFor="profileImage">Profile Picture</Label>
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="h-20 w-20">
+                        {user.image && (
+                          <AvatarImage src={user.image} alt={user.name} />
+                        )}
+                        <AvatarFallback className="text-xl">
+                          {getUserInitials(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <Input
+                          id="profileImage"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setFormData({ ...formData, profileImage: file });
+                            }
+                          }}
+                          className="max-w-xs"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Upload a new profile picture (optional)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
@@ -150,8 +178,10 @@ export default function ProfilePage() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Enter your full name"
+                      required
                     />
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
                     <Input
@@ -160,8 +190,31 @@ export default function ProfilePage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="Enter your email"
+                      required
                     />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Enter your address"
+                    />
+                  </div>
+                  
                   <div className="flex space-x-2">
                     <Button type="submit" disabled={isLoading}>
                       <Save className="h-4 w-4 mr-2" />
@@ -195,6 +248,20 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Phone Number</p>
+                      <p className="text-sm text-muted-foreground">{user.phone || 'Not provided'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Address</p>
+                      <p className="text-sm text-muted-foreground">{user.address || 'Not provided'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">Role</p>
@@ -203,51 +270,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Account Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Overview</CardTitle>
-              <CardDescription>
-                Your account statistics and recent activity.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <p className="text-2xl font-bold text-primary">0</p>
-                  <p className="text-sm text-muted-foreground">Total Orders</p>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <p className="text-2xl font-bold text-primary">0</p>
-                  <p className="text-sm text-muted-foreground">Favorites</p>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Member since</span>
-                  <span className="font-medium">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Last login</span>
-                  <span className="font-medium">Today</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Account status</span>
-                  <Badge variant="outline" className="text-green-600">Active</Badge>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </motion.div>

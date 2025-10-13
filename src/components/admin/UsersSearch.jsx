@@ -8,9 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
-export function UsersSearch() {
-  const [searchTerm, setSearchTerm] = useState('');
-
+export function UsersSearch({ searchTerm, onSearchChange }) {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -19,7 +17,7 @@ export function UsersSearch() {
           <Input
             placeholder="Search users..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
           />
         </div>

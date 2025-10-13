@@ -2,36 +2,106 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Calendar, Package } from 'lucide-react';
+import { LoaderFour } from '@/components/ui/loader';
+import { Mail, Calendar, Package, Users as UsersIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
-export function UsersGrid({ users = [] }) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function UsersGrid({ searchTerm = '' }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users || []);
+      } else {
+        throw new Error('Failed to fetch users');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = (users || []).filter(user =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <LoaderFour />
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <Card className="text-center py-12">
+        <CardContent>
+          <UsersIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No users found</h3>
+          <p className="text-muted-foreground">
+            There are no registered users in the system yet.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (filteredUsers.length === 0 && searchTerm) {
+    return (
+      <Card className="text-center py-12">
+        <CardContent>
+          <UsersIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No users found</h3>
+          <p className="text-muted-foreground">
+            No users match your search criteria. Try adjusting your search terms.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {filteredUsers.map((user) => (
-        <Card key={user.id}>
+        <Card key={user._id} className="hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-lg font-medium text-primary">
-                  {user.name.charAt(0)}
-                </span>
+                {user.image ? (
+                  <img 
+                    src={user.image} 
+                    alt={user.name} 
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-medium text-primary">
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold">{user.name}</h3>
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
                   <Mail className="h-3 w-3" />
-                  <span>{user.email}</span>
+                  <span className="truncate">{user.email}</span>
                 </div>
               </div>
             </div>
@@ -52,12 +122,24 @@ export function UsersGrid({ users = [] }) {
                 </div>
                 <span>{user.orders}</span>
               </div>
+
+              {user.phone && (
+                <div className="flex justify-between text-sm">
+                  <span>Phone</span>
+                  <span className="truncate">{user.phone}</span>
+                </div>
+              )}
             </div>
             
             <div className="mt-4 flex justify-between items-center">
-              <Badge variant={user.status === 'Active' ? 'default' : 'secondary'}>
-                {user.status}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge variant={user.status === 'Active' ? 'default' : 'secondary'}>
+                  {user.status}
+                </Badge>
+                <Badge variant="outline" className="capitalize">
+                  {user.role}
+                </Badge>
+              </div>
               <Button variant="outline" size="sm">
                 View Details
               </Button>

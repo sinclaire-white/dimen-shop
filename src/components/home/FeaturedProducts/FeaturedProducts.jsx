@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProductStore } from '@/lib/store';
-import ProductCard from './ProductCard';
+import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 
@@ -23,8 +23,8 @@ export function FeaturedProducts() {
             <div className="h-8 bg-muted animate-pulse rounded-md w-64 mx-auto mb-4" />
             <div className="h-4 bg-muted animate-pulse rounded-md w-96 mx-auto" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent className="p-4">
                   <div className="aspect-square bg-muted rounded-lg mb-4" />
@@ -104,15 +104,16 @@ export function FeaturedProducts() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {featuredProducts.slice(0, 8).map((product, index) => (
-            <motion.div key={product._id} variants={itemVariants}>
-              <ProductCard 
+          {featuredProducts.slice(0, 6).map((product, index) => (
+            <motion.div key={product._id} variants={itemVariants} className="h-full">
+              <UnifiedProductCard 
                 product={product} 
                 showBadge={true}
                 badge="⭐ Featured"
                 badgeColor="bg-primary text-primary-foreground"
+                className="h-full"
               />
             </motion.div>
           ))}

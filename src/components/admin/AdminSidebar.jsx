@@ -1,4 +1,5 @@
 "use client";
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -7,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useSyncedUser } from '@/lib/store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import LogoutConfirmationModal from '@/components/modals/LogoutConfirmationModal';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +23,8 @@ import {
   Users, 
   ShoppingCart, 
   LogOut, 
-  User
+  User,
+  Heart
 } from 'lucide-react';
 
 const adminSidebarItems = [
@@ -35,15 +38,28 @@ const adminSidebarItems = [
 const userSidebarItems = [
   { title: 'Overview', href: '/dashboard/overview', icon: LayoutDashboard },
   { title: 'My Orders', href: '/dashboard/orders', icon: ShoppingCart },
+  { title: 'Favorites', href: '/dashboard/favorites', icon: Heart },
   { title: 'Profile', href: '/dashboard/profile', icon: User },
 ];
 
 function SidebarContent({ onItemClick }) {
   const pathname = usePathname();
   const { user } = useSyncedUser();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+    setIsLoggingOut(true);
+    try {
+      await signOut({ callbackUrl: '/' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
   };
 
   const getUserInitials = (name) => {
@@ -125,7 +141,7 @@ function SidebarContent({ onItemClick }) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="text-red-600 focus:text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -137,13 +153,21 @@ function SidebarContent({ onItemClick }) {
           <div className="text-xs text-muted-foreground">Not logged in</div>
         )}
       </div>
+      
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        isLoading={isLoggingOut}
+      />
     </div>
   );
 }
 
 export default function AdminSidebar() {
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-background lg:border-r lg:fixed lg:h-full">
+    <aside className="hidden md:flex md:flex-col md:w-64 md:bg-background md:border-r md:fixed md:h-full">
       <SidebarContent onItemClick={() => {}} />
     </aside>
   );

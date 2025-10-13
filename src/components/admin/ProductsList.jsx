@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Star } from "lucide-react";
 import { LoaderFour } from "@/components/ui/loader";
+import DeleteConfirmationModal from "@/components/modals/DeleteConfirmationModal";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ export function ProductsList() {
   const { products = [], fetchProducts, loading } = useProductStore();
   const { deleteProduct, categories = [], fetchCategories } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, product: null });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -37,17 +40,25 @@ export function ProductsList() {
       product.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleDeleteClick = (product) => {
+    setDeleteModal({ isOpen: true, product });
+  };
+
   // Handle product deletion with confirmation
-  const handleDelete = async (product) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        const idToDelete = product._id || product.id;
-        await deleteProduct(idToDelete);
-        toast.success("Product deleted successfully!");
-      } catch (error) {
-        console.error("Delete error:", error);
-        toast.error("Failed to delete product");
-      }
+  const handleDelete = async () => {
+    if (!deleteModal.product) return;
+    
+    setIsDeleting(true);
+    try {
+      const idToDelete = deleteModal.product._id || deleteModal.product.id;
+      await deleteProduct(idToDelete);
+      toast.success("Product deleted successfully!");
+      setDeleteModal({ isOpen: false, product: null });
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete product");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -142,7 +153,7 @@ export function ProductsList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(product)}
+                      onClick={() => handleDeleteClick(product)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -164,6 +175,18 @@ export function ProductsList() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, product: null })}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone and all product data will be permanently removed."
+        itemName={deleteModal.product?.name}
+        confirmText="Yes, Delete Product"
+      />
     </div>
   );
 }

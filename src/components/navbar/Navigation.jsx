@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import CartButton from '@/components/cart/CartButton';
 import {
   LogOut,
   User,
@@ -80,7 +81,7 @@ export default function Navigation({ categories }) {
   return (
     <>
       {/* Desktop Navigation */}
-      <div className="hidden lg:flex items-center space-x-8">
+      <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
         <NavigationMenu>
           <NavigationMenuList>
             {navItems.map((item) => (
@@ -207,7 +208,7 @@ export default function Navigation({ categories }) {
                             </div>
                           </Link>
                           <Link
-                            href="/orders"
+                            href="/dashboard/orders"
                             className="block p-3 rounded-lg hover:bg-accent transition-colors group"
                           >
                             <div className="text-sm font-medium group-hover:text-primary">
@@ -218,7 +219,7 @@ export default function Navigation({ categories }) {
                             </div>
                           </Link>
                           <Link
-                            href="/favorites"
+                            href="/dashboard/favorites"
                             className="block p-3 rounded-lg hover:bg-accent transition-colors group"
                           >
                             <div className="text-sm font-medium group-hover:text-primary">
@@ -245,12 +246,15 @@ export default function Navigation({ categories }) {
             placeholder="Search products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 w-64 bg-muted/50 border-0 focus:bg-background transition-colors"
+            className="pl-9 w-48 md:w-56 lg:w-64 bg-muted/50 border-0 focus:bg-background transition-colors"
           />
         </form>
 
         {/* Theme Toggle */}
         <ThemeToggle />
+
+        {/* Cart Button */}
+        <CartButton />
 
         {/* User Menu */}
         {user ? (
@@ -320,7 +324,7 @@ export default function Navigation({ categories }) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/orders" className="flex items-center cursor-pointer">
+                    <Link href="/dashboard/orders" className="flex items-center cursor-pointer">
                       <Package className="mr-2 h-4 w-4" />
                       <span>Orders</span>
                     </Link>
@@ -328,7 +332,7 @@ export default function Navigation({ categories }) {
                 </>
               )}
               <DropdownMenuItem asChild>
-                <Link href="/favorites" className="flex items-center cursor-pointer">
+                <Link href="/dashboard/favorites" className="flex items-center cursor-pointer">
                   <Heart className="mr-2 h-4 w-4" />
                   <span>Favorites</span>
                 </Link>
@@ -357,7 +361,7 @@ export default function Navigation({ categories }) {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="lg:hidden flex items-center space-x-2">
+      <div className="md:hidden flex items-center space-x-2">
         {/* Mobile Search Trigger */}
         <Button variant="ghost" size="icon">
           <Search className="h-5 w-5" />
@@ -531,14 +535,14 @@ export default function Navigation({ categories }) {
                             My Dashboard
                           </Link>
                           <Link
-                            href="/orders"
+                            href="/dashboard/orders"
                             className="flex items-center px-6 py-2 text-sm hover:bg-accent transition-colors"
                             onClick={handleMobileLinkClick}
                           >
                             My Orders
                           </Link>
                           <Link
-                            href="/favorites"
+                            href="/dashboard/favorites"
                             className="flex items-center px-6 py-2 text-sm hover:bg-accent transition-colors"
                             onClick={handleMobileLinkClick}
                           >

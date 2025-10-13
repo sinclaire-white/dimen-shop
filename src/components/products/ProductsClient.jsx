@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useProductStore } from '@/lib/store';
-import ProductCard from '@/components/home/FeaturedProducts/ProductCard';
+import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { ProductsFilters } from '@/components/products/ProductsFilters';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,10 @@ export default function ProductsClient() {
 
   // Apply client-side filtering
   const filteredProducts = (products || []).filter(product => {
-    const matchesCategory = !filters.category || product.category === filters.category;
+    const productCategoryId = typeof product.category === 'object' 
+      ? product.category._id 
+      : product.category;
+    const matchesCategory = !filters.category || productCategoryId === filters.category;
     const matchesSearch = !filters.search || 
       product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
       product.description.toLowerCase().includes(filters.search.toLowerCase());
@@ -74,8 +77,8 @@ export default function ProductsClient() {
           <div className="h-8 bg-muted animate-pulse rounded-md w-64 mb-6" />
           <div className="h-4 bg-muted animate-pulse rounded-md w-96 mb-8" />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(12)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(9)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent className="p-4">
                   <div className="aspect-square bg-muted rounded-lg mb-4" />
@@ -163,13 +166,13 @@ export default function ProductsClient() {
             animate="visible"
             className={
               viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
                 : 'grid grid-cols-1 gap-4'
             }
           >
             {filteredProducts.map((product) => (
-              <motion.div key={product._id} variants={itemVariants}>
-                <ProductCard product={product} />
+              <motion.div key={product._id} variants={itemVariants} className="h-full">
+                <UnifiedProductCard product={product} className="h-full" />
               </motion.div>
             ))}
           </motion.div>

@@ -70,12 +70,75 @@ export async function GET(req) {
       cursor = cursor.limit(parseInt(limit));
     }
     
-    const products = await cursor.toArray();
+    // Use aggregation to populate category information
+    const pipeline = [
+      { $match: query },
+      {
+        $addFields: {
+          categoryObjectId: { $toObjectId: "$category" }
+        }
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryObjectId',
+          foreignField: '_id',
+          as: 'categoryInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$categoryInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          category: {
+            $ifNull: ['$categoryInfo', { _id: '$category', name: 'Unknown Category' }]
+          }
+        }
+      },
+      {
+        $project: {
+          categoryObjectId: 0,
+          categoryInfo: 0
+        }
+      }
+    ];
+
+    // Add sorting to pipeline
+    if (sort === 'buyCount') {
+      pipeline.push({ $sort: { buyCount: -1 } });
+    } else if (sort === 'price_asc') {
+      pipeline.push({ $sort: { price: 1 } });
+    } else if (sort === 'price_desc') {
+      pipeline.push({ $sort: { price: -1 } });
+    } else if (sort === 'name') {
+      pipeline.push({ $sort: { name: 1 } });
+    } else {
+      pipeline.push({ $sort: { createdAt: -1 } });
+    }
+
+    // Add skip and limit to pipeline
+    if (skip) {
+      pipeline.push({ $skip: parseInt(skip) });
+    }
+    
+    if (limit) {
+      pipeline.push({ $limit: parseInt(limit) });
+    }
+
+    const products = await collection.aggregate(pipeline).toArray();
     
     // Convert _id to string for frontend
     const formattedProducts = products.map(product => ({
       ...product,
       _id: product._id.toString(),
+      category: product.category ? {
+        ...product.category,
+        _id: product.category._id.toString()
+      } : null
     }));
     
     return NextResponse.json(formattedProducts);

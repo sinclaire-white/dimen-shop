@@ -66,8 +66,8 @@ export default async function ProductPage({ params }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square relative bg-muted rounded-lg overflow-hidden">
@@ -88,7 +88,7 @@ export default async function ProductPage({ params }) {
             
             {/* Additional Images */}
             {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {product.images.slice(1, 5).map((image, index) => (
                   <div key={index} className="aspect-square relative bg-muted rounded-lg overflow-hidden">
                     <Image

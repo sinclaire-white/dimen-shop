@@ -1,14 +1,15 @@
-// src/app/dashboard/users/page.js
+"use client";
 
+import { useState } from 'react';
 import { UsersSearch } from '@/components/admin/UsersSearch';
 import { UsersGrid } from '@/components/admin/UsersGrid';
 
-
-
 export default function Users() {
+  const [searchTerm, setSearchTerm] = useState('');
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Page Header - Static content stays in page.js */}
+      {/* Page Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Users</h1>
         <p className="text-muted-foreground">
@@ -16,11 +17,11 @@ export default function Users() {
         </p>
       </div>
 
-      {/* Search Component - Client-side interactive part */}
-      <UsersSearch />
+      {/* Search Component */}
+      <UsersSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-      {/* Users Grid - Client-side interactive part */}
-      <UsersGrid  />
+      {/* Users Grid */}
+      <UsersGrid searchTerm={searchTerm} />
     </div>
   );
 }

@@ -2,14 +2,304 @@ import { create } from 'zustand';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 
-// ✅ User store: manages authenticated user data
-export const useUserStore = create((set) => ({
+// ✅ User store: manages authenticated user data and operations
+export const useUserStore = create((set, get) => ({
   user: null, // current logged-in user info
   isLoading: true, // tracks if user data is still loading
+  favorites: [], // user's favorite products
+  orders: [], // user's orders
+  cart: [], // user's cart items
+  cartCount: 0, // number of items in cart
+  error: null,
 
   updateUser: (userData) => set({ user: userData, isLoading: false }), // update user info
-  clearUser: () => set({ user: null, isLoading: false }), // clear user data on logout
+  clearUser: () => set({ user: null, isLoading: false, favorites: [], orders: [], cart: [], cartCount: 0 }), // clear user data on logout
   setLoading: (loading) => set({ isLoading: loading }), // manually control loading state
+  setError: (error) => set({ error }),
+
+  // Profile management
+  updateProfile: async (profileData) => {
+    set({ isLoading: true, error: null });
+    try {
+      let imageUrl = get().user?.image;
+      
+      // Upload image if provided
+      if (profileData.profileImage) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', profileData.profileImage);
+        
+        const imageResponse = await fetch('/api/upload-imgbb', {
+          method: 'POST',
+          body: imageFormData,
+        });
+        
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          imageUrl = imageData.url;
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      }
+
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: profileData.name,
+          email: profileData.email,
+          phone: profileData.phone || '',
+          address: profileData.address || '',
+          image: imageUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
+      }
+
+      const updatedUser = await response.json();
+      set({ user: updatedUser, isLoading: false });
+      return updatedUser;
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  // Favorites management
+  fetchFavorites: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch('/api/user/favorites');
+      if (!response.ok) throw new Error('Failed to fetch favorites');
+      
+      const data = await response.json();
+      set({ favorites: data.favorites || [], isLoading: false });
+      return data.favorites;
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  addToFavorites: async (productId) => {
+    set({ error: null });
+    try {
+      const response = await fetch('/api/user/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add to favorites');
+      }
+
+      // Refresh favorites list
+      get().fetchFavorites();
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  removeFromFavorites: async (productId) => {
+    set({ error: null });
+    try {
+      const response = await fetch('/api/user/favorites', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove from favorites');
+      }
+
+      // Update local favorites list
+      const currentFavorites = get().favorites;
+      const updatedFavorites = currentFavorites.filter(fav => fav._id !== productId);
+      set({ favorites: updatedFavorites });
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  // Cart management
+  fetchCart: async () => {
+    try {
+      const response = await fetch('/api/user/cart');
+      if (!response.ok) throw new Error('Failed to fetch cart');
+      
+      const data = await response.json();
+      const cartItems = data.cart || [];
+      const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      
+      set({ cart: cartItems, cartCount });
+      return cartItems;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  addToCart: async (productId, quantity = 1) => {
+    try {
+      const response = await fetch('/api/user/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add to cart');
+      }
+
+      const data = await response.json();
+      
+      // Update local cart
+      await get().fetchCart();
+      return data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  removeFromCart: async (productId) => {
+    try {
+      const response = await fetch('/api/user/cart', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove from cart');
+      }
+
+      // Update local cart
+      await get().fetchCart();
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  updateCartQuantity: async (productId, quantity) => {
+    try {
+      const response = await fetch('/api/user/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update cart');
+      }
+
+      // Update local cart
+      await get().fetchCart();
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  clearCart: async () => {
+    try {
+      const response = await fetch('/api/user/cart/clear', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear cart');
+      }
+
+      set({ cart: [], cartCount: 0 });
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  // Orders management
+  fetchOrders: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch('/api/user/orders');
+      if (response.ok) {
+        const data = await response.json();
+        set({ orders: data.orders || [], isLoading: false });
+      } else {
+        set({ orders: [], isLoading: false });
+      }
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  createOrder: async (orderData) => {
+    try {
+      const response = await fetch('/api/user/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      const data = await response.json();
+      
+      // Clear cart after successful order
+      await get().clearCart();
+      
+      // Refresh orders
+      await get().fetchOrders();
+      
+      return data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  cancelOrder: async (orderId) => {
+    try {
+      const response = await fetch(`/api/user/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled' }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to cancel order');
+      }
+
+      // Refresh orders
+      await get().fetchOrders();
+      return true;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
 }));
 
 // ✅ Product store: manages products, categories, and filtering

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,8 @@ export function CategoryManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, category: null });
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -76,14 +79,22 @@ export function CategoryManager() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (categoryId) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      try {
-        await deleteCategory(categoryId);
-        toast.success('Category deleted successfully');
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete category');
-      }
+  const handleDeleteClick = (category) => {
+    setDeleteModal({ isOpen: true, category });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal.category) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteCategory(deleteModal.category._id);
+      toast.success('Category deleted successfully');
+      setDeleteModal({ isOpen: false, category: null });
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete category');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -206,7 +217,7 @@ export function CategoryManager() {
       {/* Categories Grid */}
       <motion.div variants={itemVariants}>
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent className="p-4 sm:p-6">
@@ -220,7 +231,7 @@ export function CategoryManager() {
         ) : filteredCategories.length > 0 ? (
           <motion.div
             variants={containerVariants}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6"
           >
             <AnimatePresence>
               {filteredCategories.map((category) => (
@@ -262,7 +273,7 @@ export function CategoryManager() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(category._id)}
+                          onClick={() => handleDeleteClick(category)}
                           className="flex items-center justify-center gap-1 min-w-0 text-white hover:text-white"
                         >
                           <Trash2 className="h-3 w-3 text-white" />
@@ -298,6 +309,18 @@ export function CategoryManager() {
           </Card>
         )}
       </motion.div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, category: null })}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        title="Delete Category"
+        description="Are you sure you want to delete this category? This action cannot be undone and will affect all products in this category."
+        itemName={deleteModal.category?.name}
+        confirmText="Yes, Delete Category"
+      />
     </motion.div>
   );
 }

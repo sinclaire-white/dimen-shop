@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { Package, ShoppingCart } from 'lucide-react';
 import { useProductStore } from '@/lib/store';
 import AnimatedLoader from '@/components/ui/AnimatedLoader/AnimatedLoader';
@@ -106,70 +107,17 @@ export default function CategoryPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
-              <Card 
-                key={product._id} 
-                className="group hover:shadow-lg transition-all duration-300 hover:scale-105"
-              >
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden aspect-square rounded-t-lg bg-muted/50">
-                    <Link href={`/products/${product._id}`} className="block w-full h-full relative">
-                      <Image
-                        src={product.images?.[0] || '/placeholder.png'}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover transition-transform group-hover:scale-105"
-                      />
-                    </Link>
-                    {product.featured && (
-                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="p-4">
-                    <Link href={`/products/${product._id}`}>
-                      <h3 className="font-semibold text-foreground mb-2 hover:text-primary transition-colors line-clamp-2">
-                        {product.name}
-                      </h3>
-                    </Link>
-
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-foreground">
-                          ${product.price}
-                        </span>
-                        {product.stock > 0 && (
-                          <Badge variant="outline" className="text-xs text-green-600">
-                            {product.stock} in stock
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" asChild className="flex-1">
-                        <Link href={`/products/${product._id}`}>View Details</Link>
-                      </Button>
-                      <Button
-                        size="sm"
-                        disabled={product.stock === 0}
-                        className="flex-1"
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-1" />
-                        {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <UnifiedProductCard
+                key={product._id}
+                product={product}
+                showBadge={product.featured}
+                badge="Featured"
+                badgeColor="bg-primary text-primary-foreground"
+                showFavorites={true}
+                className="h-full"
+              />
             ))}
           </div>
         )}

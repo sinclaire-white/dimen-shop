@@ -29,18 +29,18 @@ export default async function Categories() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
             <Link key={category._id} href={`/categories/${category._id}`}>
-              <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
-                <CardContent className="p-6 text-center">
+              <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer h-full">
+                <CardContent className="p-6 text-center h-full flex flex-col">
                   <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                     <Package className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {category.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
                     {category.description || `Explore ${category.name} models`}
                   </p>
                 </CardContent>
