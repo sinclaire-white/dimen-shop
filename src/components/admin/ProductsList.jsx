@@ -1,7 +1,10 @@
+// src/components/admin/ProductsList.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useAdminStore } from "@/lib/store";
+import { useProductStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Star } from "lucide-react";
@@ -12,15 +15,23 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 
 export function ProductsList() {
-  const { products, fetchProducts, deleteProduct, loading } = useAdminStore();
+  const { products = [], fetchProducts, loading } = useProductStore();
+  const { deleteProduct, categories = [], fetchCategories } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories(); // Fetch categories to get names
+  }, [fetchProducts, fetchCategories]);
+
+  // Helper function to get category name by ID
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat._id === categoryId);
+    return category ? category.name : 'Unknown Category';
+  };
 
   // Filter products based on search term
-  const filteredProducts = products.filter(
+  const filteredProducts = (products || []).filter(
     (product) =>
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -114,7 +125,7 @@ export function ProductsList() {
                       {product.name}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {product.category} • ${product.price}
+                      {getCategoryName(product.category)} • ${product.price}
                     </p>
                   </div>
                 </div>

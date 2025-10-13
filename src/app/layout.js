@@ -1,13 +1,12 @@
 import AuthProvider from "@/providers/AuthProvider";
 import "./globals.css";
-import Navbar from "@/components/navbar/Navbar";
 import ThemeProvider from "@/providers/ThemeProvider";
 import ToasterProvider from "@/providers/ToastProvider";
-import Footer from "@/components/footer/Footer";
+import LayoutWrapper from "@/components/layout/LayoutWrapper";
 
 export const metadata = {
-  title: 'DimenShop - Premium 3D Models Marketplace',
-  description: 'Discover high-quality 3D models for games, architecture, animation, and 3D printing. Premium digital assets from trusted creators.',
+  title: 'DimenShop - Premium 3D Printed Products',
+  description: 'Discover high-quality 3D printed products for your home, office, and creative projects. Custom designs and premium materials.',
 };
 
 export default function RootLayout({ children }) {
@@ -16,9 +15,9 @@ export default function RootLayout({ children }) {
       <body>
        <ThemeProvider>
          <AuthProvider>
-          <Navbar />
-          {children}
-          <Footer />
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
           <ToasterProvider />
         </AuthProvider>
        </ThemeProvider>

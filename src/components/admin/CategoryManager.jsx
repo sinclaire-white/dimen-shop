@@ -1,143 +1,303 @@
+// src/components/admin/CategoryManager.jsx
+
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Edit, Trash2, Package, Search } from 'lucide-react';
 import { useAdminStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-
-// Form component extracted to keep client-side logic separate
-function CategoryForm({ formData, setFormData, editMode, handleSubmit, setOpen, setEditMode }) {
-  return (
-    <motion.div
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0, opacity: 0 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-    >
-      <DialogHeader>
-        <DialogTitle>{editMode ? 'Edit Category' : 'Add New Category'}</DialogTitle>
-      </DialogHeader>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
-        </div>
-        <Button type="submit" className="w-full">{editMode ? 'Save' : 'Add'}</Button>
-      </form>
-    </motion.div>
-  );
-}
 
 export function CategoryManager() {
-  const { categories, fetchCategories, addCategory, deleteCategory, updateCategory } = useAdminStore();
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ id: '', name: '', description: '' });
-  const [editMode, setEditMode] = useState(false);
+  const { 
+    categories = [], 
+    loading, 
+    fetchCategories, 
+    addCategory, 
+    updateCategory, 
+    deleteCategory 
+  } = useAdminStore();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+  });
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editMode) {
-      updateCategory(formData);
-      toast.success('Category updated!');
-    } else {
-      addCategory({ name: formData.name, description: formData.description });
-      toast.success('Category added!');
-    }
-    setOpen(false);
-    setFormData({ id: '', name: '', description: '' });
-    setEditMode(false);
-  };
+  const filteredCategories = (categories || []).filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-      deleteCategory(id);
-      toast.success('Category deleted!');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      if (editingCategory) {
+        await updateCategory({ ...formData, id: editingCategory._id });
+        toast.success('Category updated successfully');
+      } else {
+        await addCategory(formData);
+        toast.success('Category created successfully');
+      }
+      
+      resetForm();
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error(error.message || 'Something went wrong');
     }
   };
 
   const handleEdit = (category) => {
-    setFormData({ id: category.id, name: category.name, description: category.description });
-    setEditMode(true);
-    setOpen(true);
+    setEditingCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description || '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (categoryId) => {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      try {
+        await deleteCategory(categoryId);
+        toast.success('Category deleted successfully');
+      } catch (error) {
+        toast.error(error.message || 'Failed to delete category');
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '' });
+    setEditingCategory(null);
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+      },
+    },
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-foreground">Categories</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Category Management</h1>
+          <p className="text-muted-foreground">
+            Manage product categories for your store
+          </p>
+        </div>
+        
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {editMode ? 'Edit Category' : 'Add Category'}
+            <Button onClick={resetForm} className="flex items-center justify-center space-x-2 w-full sm:w-auto">
+              <Plus className="h-4 w-4" />
+              <span>Add Category</span>
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <CategoryForm
-              formData={formData}
-              setFormData={setFormData}
-              editMode={editMode}
-              handleSubmit={handleSubmit}
-              setOpen={setOpen}
-              setEditMode={setEditMode}
-            />
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {editingCategory ? 'Edit Category' : 'Add New Category'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingCategory 
+                  ? 'Update the category information below.' 
+                  : 'Create a new category for your products.'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Name</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Category name"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Category description"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    resetForm();
+                    setIsModalOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? 'Saving...' : (editingCategory ? 'Update' : 'Create')}
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
-      </div>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <div
-                key={category._id}
-                className="border rounded-lg p-4 bg-background hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-foreground">{category.name}</h3>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEdit(category)} className="text-blue-500 hover:text-blue-700">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => handleDelete(category.id)} className="text-red-500 hover:text-red-700">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">{category.description}</p>
-                
-              </div>
+      {/* Search */}
+      <motion.div variants={itemVariants}>
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </motion.div>
+
+      {/* Categories Grid */}
+      <motion.div variants={itemVariants}>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-muted rounded w-full mb-4" />
+                  <div className="h-8 bg-muted rounded w-24" />
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        ) : filteredCategories.length > 0 ? (
+          <motion.div
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+          >
+            <AnimatePresence>
+              {filteredCategories.map((category) => (
+                <motion.div
+                  key={category._id}
+                  variants={itemVariants}
+                  layout
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Card className="h-full flex flex-col transition-all duration-200 hover:shadow-md">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <div className="flex flex-col">
+                          <span className="truncate" title={category.name}>{category.name}</span>
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {category.productCount || 0} {(category.productCount || 0) === 1 ? 'product' : 'products'}
+                          </span>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col pt-0">
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-grow leading-relaxed">
+                        {category.description || 'No description available'}
+                      </p>
+                      
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2 mt-auto pt-2 border-t border-border/50">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(category)}
+                          className="flex items-center justify-center gap-1 min-w-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                          <span className="hidden sm:inline">Edit</span>
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(category._id)}
+                          className="flex items-center justify-center gap-1 min-w-0 text-white hover:text-white"
+                        >
+                          <Trash2 className="h-3 w-3 text-white" />
+                          <span className="hidden sm:inline text-white">Delete</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        ) : (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {searchTerm ? 'No categories found' : 'No categories yet'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm 
+                  ? 'Try adjusting your search terms.'
+                  : 'Get started by creating your first product category.'
+                }
+              </p>
+              {!searchTerm && (
+                <Button onClick={() => setIsModalOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Category
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,3 +1,5 @@
+// src/components/home/categories/CategoriesCard.jsx
+
 'use client';
 
 import { motion } from 'framer-motion';

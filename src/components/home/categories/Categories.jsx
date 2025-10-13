@@ -1,22 +1,54 @@
-import { CategoriesCard } from './CategoriesCard';
+// src/components/home/categories/Categories.jsx
+
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Package } from 'lucide-react';
 
 async function fetchCategories() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  const response = await fetch(`${baseUrl}/api/categories`, {
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch categories');
+  try {
+    const res = await fetch(`${baseUrl}/api/categories`, { cache: 'force-cache', next: { revalidate: 3600 } });
+    return res.ok ? await res.json() : [];
+  } catch {
+    return [];
   }
-  return response.json();
 }
 
 export default async function Categories() {
-  try {
-    const categories = await fetchCategories();
-    return <CategoriesCard categories={categories} />;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return <CategoriesCard categories={[]} />;
-  }
+  const categories = await fetchCategories();
+
+  if (!categories || categories.length === 0) return null;
+
+  return (
+    <section className="py-16 bg-muted/30">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Browse Categories</h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Explore our organized collection of 3D models by category
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {categories.map((category) => (
+            <Link key={category._id} href={`/categories/${category._id}`}>
+              <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Package className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {category.description || `Explore ${category.name} models`}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }

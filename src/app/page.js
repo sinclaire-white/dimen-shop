@@ -1,33 +1,47 @@
-// app/page.js - Updated home page
-import { FeaturedProducts } from '@/components/home/FeaturedProducts/FeaturedProducts';
-import { WhyChooseUs } from '@/components/home/WhyChooseUs';
-import { Newsletter } from '@/components/home/Newsletter';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+// app/page.js 
 
-import HeroBanner from '@/components/home/HeroBanner/HeroBanner';
-import Categories from '@/components/home/categories/Categories';
 import CTASection from '@/components/home/CTASection';
+import HeroBanner from '@/components/home/HeroBanner/HeroBanner';
+import { Newsletter } from '@/components/home/Newsletter';
+import { WhyChooseUs } from '@/components/home/WhyChooseUs';
+import Categories from '@/components/home/categories/Categories';
+import { FeaturedProducts } from '@/components/home/FeaturedProducts/FeaturedProducts';
+import { PopularProducts } from '@/components/home/PopularProducts/PopularProducts';
+
+export const metadata = {
+  title: 'DimenShop - Premium 3D Printed Products',
+  description: 'Discover high-quality 3D printed products for your home, office, and creative projects. Custom designs and premium materials.',
+  keywords: '3D printing, custom products, 3D models, printed accessories',
+  openGraph: {
+    title: 'DimenShop - Premium 3D Printed Products',
+    description: 'Discover high-quality 3D printed products for your home, office, and creative projects.',
+    type: 'website',
+  },
+};
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <HeroBanner></HeroBanner>
-      <Categories></Categories>
+      <HeroBanner />
+      
       {/* Categories section */}
+      <Categories />
     
       {/* Featured Products Section */}
-      <FeaturedProducts></FeaturedProducts>
+      <FeaturedProducts />
+
+      {/* Popular Products Section */}
+      <PopularProducts />
 
       {/* Why Choose Us Section */}
-      <WhyChooseUs></WhyChooseUs>
+      <WhyChooseUs />
 
       {/* CTA Section */}
-     <CTASection></CTASection>
+      <CTASection />
+      
       {/* Newsletter Section */}
-      <Newsletter></Newsletter>
-
+      <Newsletter />
     </div>
   );
 }

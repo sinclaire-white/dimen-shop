@@ -14,12 +14,12 @@ const statusColors = {
   Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 };
 
-export function OrdersTable({ orders }) {
+export function OrdersTable({ orders = [] }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredOrders = orders.filter(order =>
-    order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customer.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = (orders || []).filter(order =>
+    order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customer?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

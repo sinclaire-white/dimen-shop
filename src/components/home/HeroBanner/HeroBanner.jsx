@@ -19,14 +19,14 @@ export default function HeroBanner() {
         <p className="text-lg md:text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-8">
           Custom 3D printed products—from characters to props. Fast, affordable, magical.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/products">
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+          <Link href="/products" className="flex-1">
+            <Button size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
               Shop Now
             </Button>
           </Link>
-          <Link href="/about">
-            <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-accent">
+          <Link href="/about" className="flex-1">
+            <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-accent">
               Learn More
             </Button>
           </Link>

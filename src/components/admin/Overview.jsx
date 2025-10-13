@@ -1,98 +1,262 @@
-// src/components/admin/Overview
-
 'use client';
 
-import { useEffect } from 'react';
-import { useAdminStore } from '@/lib/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Users, Package, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Package, Users, ShoppingCart, TrendingUp, Eye, Star } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-const stats = [
-  { name: 'Total Revenue', value: '$45,231.89', change: '+20.1%', icon: DollarSign },
-  { name: 'Total Orders', value: '1,234', change: '+18.1%', icon: TrendingUp },
-  { name: 'Products', value: '573', change: '+12.4%', icon: Package },
-  { name: 'Customers', value: '12,234', change: '+19.2%', icon: Users },
+const statsData = [
+  {
+    title: 'Total Products',
+    value: '124',
+    change: '+12%',
+    trend: 'up',
+    icon: Package,
+    color: 'bg-blue-500',
+  },
+  {
+    title: 'Total Users',
+    value: '2,847',
+    change: '+18%',
+    trend: 'up',
+    icon: Users,
+    color: 'bg-green-500',
+  },
+  {
+    title: 'Total Orders',
+    value: '1,264',
+    change: '+8%',
+    trend: 'up',
+    icon: ShoppingCart,
+    color: 'bg-purple-500',
+  },
+  {
+    title: 'Revenue',
+    value: '$12,847',
+    change: '+23%',
+    trend: 'up',
+    icon: TrendingUp,
+    color: 'bg-orange-500',
+  },
 ];
 
-export function OverviewPage() {
-  const { analytics, fetchDashboardData } = useAdminStore();
+const recentActivity = [
+  {
+    id: 1,
+    action: 'New product added',
+    item: 'Gaming Keyboard Stand',
+    time: '2 hours ago',
+    type: 'product',
+  },
+  {
+    id: 2,
+    action: 'Order completed',
+    item: 'Order #12847',
+    time: '4 hours ago',
+    type: 'order',
+  },
+  {
+    id: 3,
+    action: 'New user registered',
+    item: 'john.doe@example.com',
+    time: '6 hours ago',
+    type: 'user',
+  },
+  {
+    id: 4,
+    action: 'Product featured',
+    item: 'Phone Stand Pro',
+    time: '8 hours ago',
+    type: 'product',
+  },
+];
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+const topProducts = [
+  {
+    id: 1,
+    name: 'Phone Stand Pro',
+    sales: 234,
+    revenue: '$2,340',
+    trend: '+15%',
+  },
+  {
+    id: 2,
+    name: 'Gaming Mouse Pad',
+    sales: 189,
+    revenue: '$1,890',
+    trend: '+8%',
+  },
+  {
+    id: 3,
+    name: 'Desk Organizer',
+    sales: 156,
+    revenue: '$1,560',
+    trend: '+12%',
+  },
+  {
+    id: 4,
+    name: 'Cable Management',
+    sales: 142,
+    revenue: '$1,420',
+    trend: '+6%',
+  },
+];
+
+export default function Overview() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-        <p className="text-muted-foreground">
-          Welcome to your DimenShop admin dashboard
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto p-6">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-6"
+      >
+        {/* Header */}
+        <motion.div variants={itemVariants}>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard Overview</h1>
+          <p className="text-muted-foreground">
+            Welcome back! Here&apos;s what&apos;s happening with your store.
+          </p>
+        </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+      <motion.div
+        variants={itemVariants}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        {statsData.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.name}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.name}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-600">{stat.change}</span> from last month
-                </p>
+            <Card key={index} className="relative overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {stat.value}
+                    </p>
+                    <div className="flex items-center mt-2">
+                      <Badge
+                        variant={stat.trend === 'up' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {stat.change}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-full ${stat.color} text-white`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           );
         })}
-      </div>
+      </motion.div>
 
-      {/* Charts and Additional Analytics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>
-              Monthly revenue growth for the past 6 months
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              Revenue Chart Placeholder
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Latest orders and user registrations
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">New order #ORD-{1000 + i}</p>
-                    <p className="text-xs text-muted-foreground">2 minutes ago</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Eye className="h-5 w-5" />
+                <span>Recent Activity</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {activity.action}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.item}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.time}
+                    </p>
                   </div>
-                  <div className="text-sm font-medium">${(i * 49.99).toFixed(2)}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Top Products */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Star className="h-5 w-5" />
+                <span>Top Products</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {topProducts.map((product, index) => (
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {product.sales} sales
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">
+                        {product.revenue}
+                      </p>
+                      <Badge variant="default" className="text-xs">
+                        {product.trend}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
+    </motion.div>
     </div>
   );
 }

@@ -1,60 +1,125 @@
-// app/api/products/route.js - Updated with featured and stock fields
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import dbConnect from '@/lib/dbConnect';
+import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { z } from 'zod';
 
-export async function GET(request) {
+// Validation for creating products
+const productSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  price: z.number().positive('Price must be positive'),
+  category: z.string().min(1, 'Category is required'),
+  stock: z.number().int().min(0, 'Stock must be non-negative'),
+  images: z.array(z.string()).min(1, 'At least one image is required'),
+  fileFormat: z.string().optional(),
+  printMaterial: z.string().optional(),
+  dimensions: z.string().optional(),
+  printTime: z.string().optional(),
+  featured: z.boolean().optional(),
+  buyCount: z.number().int().min(0).optional().default(0),
+});
+
+// GET: Fetch products with filtering
+export async function GET(req) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
+    const limit = searchParams.get('limit');
+    const skip = searchParams.get('skip');
+    const sort = searchParams.get('sort');
+
+    const client = await clientPromise;
+    const db = client.db('dimenshopdb');
+    const collection = db.collection('products');
     
-    const { collection } = await dbConnect('products');
-    
-    // Build query based on parameters
+    // Build query object
     let query = {};
-    if (category) query.category = category;
-    if (featured === 'true') query.featured = true;
     
-    const products = await collection.find(query).toArray();
-    return NextResponse.json(products);
+    if (category) {
+      query.category = category;
+    }
+    
+    if (featured === 'true') {
+      query.featured = true;
+    }
+
+    // Build the query with pagination and sorting
+    let cursor = collection.find(query);
+    
+    // Sorting options
+    if (sort === 'buyCount') {
+      cursor = cursor.sort({ buyCount: -1 });
+    } else if (sort === 'price_asc') {
+      cursor = cursor.sort({ price: 1 });
+    } else if (sort === 'price_desc') {
+      cursor = cursor.sort({ price: -1 });
+    } else if (sort === 'name') {
+      cursor = cursor.sort({ name: 1 });
+    } else {
+      cursor = cursor.sort({ createdAt: -1 });
+    }
+    
+    if (skip) {
+      cursor = cursor.skip(parseInt(skip));
+    }
+    
+    if (limit) {
+      cursor = cursor.limit(parseInt(limit));
+    }
+    
+    const products = await cursor.toArray();
+    
+    // Convert _id to string for frontend
+    const formattedProducts = products.map(product => ({
+      ...product,
+      _id: product._id.toString(),
+    }));
+    
+    return NextResponse.json(formattedProducts);
   } catch (error) {
-    console.error('Fetch products error:', error);
+    console.error('Error fetching products:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 
-// POST - Updated to include featured and stock
-export async function POST(request) {
+// POST: Create new product (admin only)
+export async function POST(req) {
+  // Check if user is admin
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const data = await request.json();
-    const { collection } = await dbConnect('products');
+    const body = await req.json();
+    const validatedData = productSchema.parse(body);
+
+    const client = await clientPromise;
+    const db = client.db('dimenshopdb');
+    const collection = db.collection('products');
     
-    const result = await collection.insertOne({
-      ...data,
-      featured: data.featured || false,
-      stock: data.stock || 0,
+    // Add timestamps
+    const productData = {
+      ...validatedData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    });
-    
-    const newProduct = { 
-      id: result.insertedId.toString(), 
-      ...data,
-      featured: data.featured || false,
-      stock: data.stock || 0
     };
     
-    return NextResponse.json(newProduct, { status: 201 });
+    const result = await collection.insertOne(productData);
+    const newProduct = await collection.findOne({ _id: result.insertedId });
+    
+    return NextResponse.json({
+      ...newProduct,
+      _id: newProduct._id.toString(),
+    }, { status: 201 });
   } catch (error) {
-    console.error('Add product error:', error);
-    return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    console.error('Error creating product:', error);
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
 }

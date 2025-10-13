@@ -1,17 +1,6 @@
-import { ProductForm } from '@/components/admin/ProductForm';
+// src/app/dashboard/products/add/page.js
 
-// Static data - can be moved to database later
-const categories = [
-  { id: 'characters', name: '3D Characters' },
-  { id: 'environment', name: 'Environment Packs' },
-  { id: 'props', name: 'Props & Assets' },
-  { id: 'vehicles', name: 'Vehicles' },
-  { id: 'buildings', name: 'Buildings' },
-  { id: 'weapons', name: 'Weapons' },
-];
-
-const fileFormats = ['STL', 'OBJ', 'FBX', 'BLEND', '3MF', 'AMF'];
-const printMaterials = ['PLA', 'ABS', 'PETG', 'TPU', 'Resin', 'Nylon', 'Metal Filament'];
+import { ProductForm } from "@/components/admin/ProductForm";
 
 export default function AddProductPage() {
   return (
@@ -24,17 +13,15 @@ export default function AddProductPage() {
           </button>
         </a>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Add New Product</h1>
-          <p className="text-muted-foreground">Add a new 3D model to your collection</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Add New Product</h1>
+          <p className="text-muted-foreground">
+            Add a new 3D model to your collection
+          </p>
         </div>
       </div>
 
       {/* Interactive Form Component */}
-      <ProductForm 
-        categories={categories}
-        fileFormats={fileFormats}
-        printMaterials={printMaterials}
-      />
+      <ProductForm />
     </div>
   );
 }

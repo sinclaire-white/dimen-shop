@@ -1,26 +1,28 @@
-// app/api/categories/[id]/route.js
+// src/app/api/categories/[id]/route.js
+
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
-import dbConnect from '@/lib/dbConnect';
+import clientPromise from '@/lib/mongodb';
 
+// GET: Fetch a single category by ID with product count
 export async function GET(request, { params }) {
-  let client;
-  
   try {
-    if (!params?.id || !ObjectId.isValid(params.id)) {
+    // Validate category ID
+    const { id } = params;
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
-        { error: 'Invalid category ID' },
+        { error: 'Invalid category ID format' },
         { status: 400 }
       );
     }
 
-    const { client: dbClient } = await dbConnect('categories');
-    client = dbClient;
-    const db = client.db();
+    // Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db('dimenshopdb');
 
-    // Get category and its products count
+    // Fetch category
     const category = await db.collection('categories').findOne({
-      _id: new ObjectId(params.id)
+      _id: new ObjectId(id),
     });
 
     if (!category) {
@@ -30,26 +32,22 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Count products in this category
+    // Count products in this category (using 'category' field for consistency)
     const productCount = await db.collection('products').countDocuments({
-      categoryId: new ObjectId(params.id)
+      category: id, // Matches string ID used in products collection
     });
 
+    // Return category with string _id and product count
     return NextResponse.json({
       ...category,
       _id: category._id.toString(),
-      productCount
+      productCount,
     });
-
   } catch (error) {
     console.error('Fetch category error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch category' },
+      { error: `Failed to fetch category: ${error.message}` },
       { status: 500 }
     );
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
