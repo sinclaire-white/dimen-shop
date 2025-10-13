@@ -19,6 +19,7 @@ import {
   Truck
 } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 const statusConfig = {
   'pending': {
@@ -54,14 +55,35 @@ const statusConfig = {
 };
 
 export default function UserOrdersPage() {
-  const { user, orders, fetchOrders, isLoading } = useSyncedUser();
+  const { user, orders, fetchOrders, cancelOrder, isLoading } = useSyncedUser();
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [cancellingOrder, setCancellingOrder] = useState(null);
+
+
 
   useEffect(() => {
     if (user) {
       fetchOrders();
     }
   }, [user, fetchOrders]);
+
+  const handleCancelOrder = async (orderId) => {
+    if (!confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+
+    setCancellingOrder(orderId);
+    try {
+      await cancelOrder(orderId);
+      toast.success('Order cancelled successfully');
+      // Orders will be automatically refreshed by the cancelOrder function
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      toast.error('Failed to cancel order. Please try again.');
+    } finally {
+      setCancellingOrder(null);
+    }
+  };
 
   if (!user) {
     return (
@@ -132,10 +154,10 @@ export default function UserOrdersPage() {
             return (
               <Card key={order._id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Order Info */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <h3 className="font-semibold">
                           Order #{order._id?.slice(-8).toUpperCase()}
                         </h3>
@@ -145,7 +167,7 @@ export default function UserOrdersPage() {
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
                           {order.createdAt ? format(new Date(order.createdAt), 'MMM dd, yyyy') : 'N/A'}
@@ -162,15 +184,28 @@ export default function UserOrdersPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:min-w-fit">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setSelectedOrder(selectedOrder === order._id ? null : order._id)}
+                        className="shrink-0"
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         {selectedOrder === order._id ? 'Hide' : 'View'} Details
                       </Button>
+                      {(order.status === 'pending' || order.status === 'confirmed') && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleCancelOrder(order._id)}
+                          disabled={cancellingOrder === order._id || isLoading}
+                          className="bg-red-600 hover:bg-red-700 text-white border-red-600 shrink-0 font-medium"
+                        >
+                          <XCircle className="w-4 h-4 mr-1 text-white" />
+                          {cancellingOrder === order._id ? 'Cancelling...' : 'Cancel Order'}
+                        </Button>
+                      )}
                     </div>
                   </div>
 

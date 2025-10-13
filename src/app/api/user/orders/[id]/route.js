@@ -43,10 +43,10 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Only allow cancellation if order is pending
-    if (order.status !== 'pending' && status === 'cancelled') {
+    // Only allow cancellation if order is pending or confirmed
+    if (status === 'cancelled' && !['pending', 'confirmed'].includes(order.status)) {
       return NextResponse.json(
-        { error: 'Can only cancel pending orders' },
+        { error: 'Can only cancel pending or confirmed orders' },
         { status: 400 }
       );
     }
