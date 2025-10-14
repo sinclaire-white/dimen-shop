@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Star, Package, Clock, Ruler, Palette } from 'lucide-react';
 
+// Enable ISR - Revalidate every 30 minutes (products change more frequently)
+export const revalidate = 1800;
+
 async function getProduct(id) {
   try {
     if (!ObjectId.isValid(id)) {

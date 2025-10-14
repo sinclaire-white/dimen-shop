@@ -6,49 +6,22 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LoaderFour } from '@/components/ui/loader';
 import { Mail, Calendar, Package, Users as UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAdminStore } from '@/lib/store';
 
 export function UsersGrid({ searchTerm = '' }) {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { users, fetchUsers } = useAdminStore();
 
   useEffect(() => {
     fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
-      } else {
-        throw new Error('Failed to fetch users');
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchUsers]);
 
   const filteredUsers = (users || []).filter(user =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoaderFour />
-      </div>
-    );
-  }
 
   if (users.length === 0) {
     return (

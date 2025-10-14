@@ -36,8 +36,8 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4">
+    <section className="py-12 md:py-16 bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <Card className="bg-background border border-muted shadow-lg rounded-xl">
           <CardContent className="p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">

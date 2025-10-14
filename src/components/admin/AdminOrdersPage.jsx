@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useAdminStore } from '@/lib/store';
 
 const statusConfig = {
   'pending': {
@@ -58,38 +59,20 @@ const statusConfig = {
 };
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState([]);
+  const { orders, fetchOrders, updateOrderStatus } = useAdminStore();
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [updatingOrders, setUpdatingOrders] = useState(new Set());
 
   useEffect(() => {
-    fetchAllOrders();
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
   useEffect(() => {
     filterOrders();
   }, [orders, searchTerm, statusFilter]);
-
-  const fetchAllOrders = async () => {
-    try {
-      const response = await fetch('/api/admin/orders');
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data.orders || []);
-      } else {
-        toast.error('Failed to fetch orders');
-      }
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      toast.error('Failed to fetch orders');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const filterOrders = () => {
     let filtered = orders;
@@ -109,25 +92,13 @@ export default function AdminOrdersPage() {
     setFilteredOrders(filtered);
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
     setUpdatingOrders(prev => new Set(prev).add(orderId));
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (response.ok) {
-        toast.success(`Order ${newStatus} successfully`);
-        await fetchAllOrders(); // Refresh orders
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || 'Failed to update order');
-      }
+      await updateOrderStatus(orderId, newStatus);
+      toast.success(`Order ${newStatus} successfully`);
     } catch (error) {
-      console.error('Failed to update order:', error);
-      toast.error('Failed to update order');
+      toast.error(error.message || 'Failed to update order');
     } finally {
       setUpdatingOrders(prev => {
         const newSet = new Set(prev);
@@ -144,27 +115,6 @@ export default function AdminOrdersPage() {
   const canUpdateOrder = (order) => {
     return order.status !== 'cancelled' && order.status !== 'delivered';
   };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="h-8 bg-muted animate-pulse rounded w-48" />
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-4 bg-muted rounded w-1/2" />
-                  <div className="h-4 bg-muted rounded w-1/4" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -285,7 +235,7 @@ export default function AdminOrdersPage() {
                             <>
                               <Button
                                 size="sm"
-                                onClick={() => updateOrderStatus(order._id, 'confirmed')}
+                                onClick={() => handleUpdateOrderStatus(order._id, 'confirmed')}
                                 disabled={isUpdating}
                               >
                                 {isUpdating ? (
@@ -300,7 +250,7 @@ export default function AdminOrdersPage() {
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() => updateOrderStatus(order._id, 'cancelled')}
+                                onClick={() => handleUpdateOrderStatus(order._id, 'cancelled')}
                                 disabled={isUpdating}
                                 className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
                               >
@@ -323,7 +273,7 @@ export default function AdminOrdersPage() {
                             <>
                               <Button
                                 size="sm"
-                                onClick={() => updateOrderStatus(order._id, 'processing')}
+                                onClick={() => handleUpdateOrderStatus(order._id, 'processing')}
                                 disabled={isUpdating}
                               >
                                 {isUpdating ? (
@@ -338,7 +288,7 @@ export default function AdminOrdersPage() {
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() => updateOrderStatus(order._id, 'cancelled')}
+                                onClick={() => handleUpdateOrderStatus(order._id, 'cancelled')}
                                 disabled={isUpdating}
                                 className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
                               >
@@ -360,7 +310,7 @@ export default function AdminOrdersPage() {
                           {order.status === 'processing' && (
                             <Button
                               size="sm"
-                              onClick={() => updateOrderStatus(order._id, 'shipped')}
+                              onClick={() => handleUpdateOrderStatus(order._id, 'shipped')}
                               disabled={isUpdating}
                             >
                               {isUpdating ? (
@@ -377,7 +327,7 @@ export default function AdminOrdersPage() {
                           {order.status === 'shipped' && (
                             <Button
                               size="sm"
-                              onClick={() => updateOrderStatus(order._id, 'delivered')}
+                              onClick={() => handleUpdateOrderStatus(order._id, 'delivered')}
                               disabled={isUpdating}
                             >
                               {isUpdating ? 'Updating...' : 'Deliver'}

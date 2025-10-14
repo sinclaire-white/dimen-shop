@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 // ✅ User store: manages authenticated user data and operations
 export const useUserStore = create((set, get) => ({
@@ -28,42 +29,28 @@ export const useUserStore = create((set, get) => ({
         const imageFormData = new FormData();
         imageFormData.append('image', profileData.profileImage);
         
-        const imageResponse = await fetch('/api/upload-imgbb', {
-          method: 'POST',
-          body: imageFormData,
+        const imageResponse = await axios.post('/api/upload-imgbb', imageFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
         
-        if (imageResponse.ok) {
-          const imageData = await imageResponse.json();
-          imageUrl = imageData.url;
-        } else {
-          throw new Error('Failed to upload image');
-        }
+        imageUrl = imageResponse.data.url;
       }
 
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: profileData.name,
-          email: profileData.email,
-          phone: profileData.phone || '',
-          address: profileData.address || '',
-          image: imageUrl,
-        }),
+      const response = await axios.put('/api/user/profile', {
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone || '',
+        address: profileData.address || '',
+        image: imageUrl,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update profile');
-      }
-
-      const updatedUser = await response.json();
+      const updatedUser = response.data;
       set({ user: updatedUser, isLoading: false });
       return updatedUser;
     } catch (error) {
-      set({ error: error.message, isLoading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      set({ error: errorMessage, isLoading: false });
+      throw new Error(errorMessage);
     }
   },
 
@@ -71,54 +58,36 @@ export const useUserStore = create((set, get) => ({
   fetchFavorites: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/user/favorites');
-      if (!response.ok) throw new Error('Failed to fetch favorites');
-      
-      const data = await response.json();
-      set({ favorites: data.favorites || [], isLoading: false });
-      return data.favorites;
+      const response = await axios.get('/api/user/favorites');
+      const favorites = response.data.favorites || [];
+      set({ favorites, isLoading: false });
+      return favorites;
     } catch (error) {
-      set({ error: error.message, isLoading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch favorites';
+      set({ error: errorMessage, isLoading: false });
+      throw new Error(errorMessage);
     }
   },
 
   addToFavorites: async (productId) => {
     set({ error: null });
     try {
-      const response = await fetch('/api/user/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to add to favorites');
-      }
+      await axios.post('/api/user/favorites', { productId });
 
       // Refresh favorites list
       get().fetchFavorites();
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to add to favorites';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   removeFromFavorites: async (productId) => {
     set({ error: null });
     try {
-      const response = await fetch('/api/user/favorites', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove from favorites');
-      }
+      await axios.delete('/api/user/favorites', { data: { productId } });
 
       // Update local favorites list
       const currentFavorites = get().favorites;
@@ -126,112 +95,80 @@ export const useUserStore = create((set, get) => ({
       set({ favorites: updatedFavorites });
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to remove from favorites';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   // Cart management
   fetchCart: async () => {
     try {
-      const response = await fetch('/api/user/cart');
-      if (!response.ok) throw new Error('Failed to fetch cart');
-      
-      const data = await response.json();
-      const cartItems = data.cart || [];
+      const response = await axios.get('/api/user/cart');
+      const cartItems = response.data.cart || [];
       const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       
       set({ cart: cartItems, cartCount });
       return cartItems;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch cart';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   addToCart: async (productId, quantity = 1) => {
     try {
-      const response = await fetch('/api/user/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity }),
-      });
+      const response = await axios.post('/api/user/cart', { productId, quantity });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to add to cart');
-      }
-
-      const data = await response.json();
-      
       // Update local cart
       await get().fetchCart();
-      return data;
+      return response.data;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to add to cart';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   removeFromCart: async (productId) => {
     try {
-      const response = await fetch('/api/user/cart', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove from cart');
-      }
+      await axios.delete('/api/user/cart', { data: { productId } });
 
       // Update local cart
       await get().fetchCart();
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to remove from cart';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   updateCartQuantity: async (productId, quantity) => {
     try {
-      const response = await fetch('/api/user/cart', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update cart');
-      }
+      await axios.put('/api/user/cart', { productId, quantity });
 
       // Update local cart
       await get().fetchCart();
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update cart';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   clearCart: async () => {
     try {
-      const response = await fetch('/api/user/cart/clear', {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to clear cart');
-      }
+      await axios.delete('/api/user/cart/clear');
 
       set({ cart: [], cartCount: 0 });
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to clear cart';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
@@ -239,32 +176,23 @@ export const useUserStore = create((set, get) => ({
   fetchOrders: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/user/orders');
-      if (response.ok) {
-        const data = await response.json();
-        set({ orders: data.orders || [], isLoading: false });
-      } else {
-        set({ orders: [], isLoading: false });
-      }
+      const response = await axios.get('/api/user/orders');
+      const orders = response.data.orders || [];
+      set({ orders, isLoading: false });
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      // Handle case where user has no orders (404) as success
+      if (error.response?.status === 404) {
+        set({ orders: [], isLoading: false });
+      } else {
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch orders';
+        set({ error: errorMessage, isLoading: false });
+      }
     }
   },
 
   createOrder: async (orderData) => {
     try {
-      const response = await fetch('/api/user/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create order');
-      }
-
-      const data = await response.json();
+      const response = await axios.post('/api/user/orders', orderData);
       
       // Clear cart after successful order
       await get().clearCart();
@@ -272,32 +200,25 @@ export const useUserStore = create((set, get) => ({
       // Refresh orders
       await get().fetchOrders();
       
-      return data;
+      return response.data;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create order';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   cancelOrder: async (orderId) => {
     try {
-      const response = await fetch(`/api/user/orders/${orderId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'cancelled' }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to cancel order');
-      }
+      await axios.put(`/api/user/orders/${orderId}`, { status: 'cancelled' });
 
       // Refresh orders
       await get().fetchOrders();
       return true;
     } catch (error) {
-      set({ error: error.message });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to cancel order';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 }));
@@ -328,23 +249,22 @@ export const useProductStore = create((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-      if (filters.category) queryParams.append('category', filters.category);
-      if (filters.featured) queryParams.append('featured', 'true');
-      if (filters.limit) queryParams.append('limit', filters.limit);
-      if (filters.skip) queryParams.append('skip', filters.skip);
+      const params = {};
+      if (filters.category) params.category = filters.category;
+      if (filters.featured) params.featured = 'true';
+      if (filters.limit) params.limit = filters.limit;
+      if (filters.skip) params.skip = filters.skip;
 
-      const response = await fetch(`/api/products?${queryParams}`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+      const response = await axios.get('/api/products', { params });
       
-      const data = await response.json();
       set({ 
-        products: data,
+        products: response.data,
         lastProductsFetch: now,
         loading: false 
       });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch products';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -358,16 +278,15 @@ export const useProductStore = create((set, get) => ({
     }
 
     try {
-      const response = await fetch('/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      const response = await axios.get('/api/categories');
       
-      const data = await response.json();
       set({ 
-        categories: data,
+        categories: response.data,
         lastCategoriesFetch: now 
       });
     } catch (error) {
-      set({ error: error.message });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch categories';
+      set({ error: errorMessage });
     }
   },
 
@@ -375,13 +294,14 @@ export const useProductStore = create((set, get) => ({
   fetchFeaturedProducts: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/products?featured=true&limit=8');
-      if (!response.ok) throw new Error('Failed to fetch featured products');
+      const response = await axios.get('/api/products', { 
+        params: { featured: 'true', limit: 8 }
+      });
       
-      const data = await response.json();
-      set({ featuredProducts: data, loading: false });
+      set({ featuredProducts: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch featured products';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -389,13 +309,14 @@ export const useProductStore = create((set, get) => ({
   fetchPopularProducts: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/products?sort=buyCount&limit=8');
-      if (!response.ok) throw new Error('Failed to fetch popular products');
+      const response = await axios.get('/api/products', { 
+        params: { sort: 'buyCount', limit: 8 }
+      });
       
-      const data = await response.json();
-      set({ popularProducts: data, loading: false });
+      set({ popularProducts: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch popular products';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -404,24 +325,18 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const [categoryResponse, productsResponse] = await Promise.all([
-        fetch(`/api/categories/${categoryId}`),
-        fetch(`/api/products?category=${categoryId}`)
+        axios.get(`/api/categories/${categoryId}`),
+        axios.get('/api/products', { params: { category: categoryId } })
       ]);
 
-      if (!categoryResponse.ok || !productsResponse.ok) {
-        throw new Error('Failed to fetch category data');
-      }
-
-      const category = await categoryResponse.json();
-      const products = await productsResponse.json();
-
       set({ 
-        category,
-        products,
+        category: categoryResponse.data,
+        products: productsResponse.data,
         loading: false 
       });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch category data';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -446,13 +361,11 @@ export const useAdminStore = create((set, get) => ({
   fetchDashboardData: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/admin/analytics');
-      if (!response.ok) throw new Error('Failed to fetch analytics');
-      
-      const data = await response.json();
-      set({ analytics: data, loading: false });
+      const response = await axios.get('/api/admin/analytics');
+      set({ analytics: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch analytics';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -460,13 +373,11 @@ export const useAdminStore = create((set, get) => ({
   fetchUsers: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/admin/users');
-      if (!response.ok) throw new Error('Failed to fetch users');
-      
-      const data = await response.json();
-      set({ users: data, loading: false });
+      const response = await axios.get('/api/admin/users');
+      set({ users: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch users';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -474,13 +385,45 @@ export const useAdminStore = create((set, get) => ({
   fetchOrders: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/admin/orders');
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      
-      const data = await response.json();
-      set({ orders: data, loading: false });
+      const response = await axios.get('/api/admin/orders');
+      set({ orders: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch orders';
+      set({ error: errorMessage, loading: false });
+    }
+  },
+
+  // Update order status
+  updateOrderStatus: async (orderId, status) => {
+    set({ loading: true, error: null });
+    try {
+      await axios.put(`/api/admin/orders/${orderId}`, { status });
+      
+      // Refresh orders list
+      await get().fetchOrders();
+      set({ loading: false });
+      return true;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update order';
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Delete user
+  deleteUser: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      await axios.delete(`/api/users/${userId}`);
+      
+      // Refresh users list
+      await get().fetchUsers();
+      set({ loading: false });
+      return true;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete user';
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
@@ -488,20 +431,15 @@ export const useAdminStore = create((set, get) => ({
   createProduct: async (productData) => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
-      });
-
-      if (!response.ok) throw new Error('Failed to create product');
+      await axios.post('/api/products', productData);
       
       // Refresh products list
       get().fetchProducts({ force: true });
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create product';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   },
@@ -510,20 +448,15 @@ export const useAdminStore = create((set, get) => ({
   updateProduct: async (productId, productData) => {
     set({ loading: true });
     try {
-      const response = await fetch(`/api/products/${productId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
-      });
-
-      if (!response.ok) throw new Error('Failed to update product');
+      await axios.put(`/api/products/${productId}`, productData);
       
       // Refresh products list
       get().fetchProducts({ force: true });
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update product';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   },
@@ -532,18 +465,15 @@ export const useAdminStore = create((set, get) => ({
   deleteProduct: async (productId) => {
     set({ loading: true });
     try {
-      const response = await fetch(`/api/products/${productId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) throw new Error('Failed to delete product');
+      await axios.delete(`/api/products/${productId}`);
       
       // Refresh products list by calling the product store
       useProductStore.getState().fetchProducts();
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete product';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   },
@@ -553,33 +483,26 @@ export const useAdminStore = create((set, get) => ({
   fetchCategories: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      
-      const data = await response.json();
-      set({ categories: data, loading: false });
+      const response = await axios.get('/api/categories');
+      set({ categories: response.data, loading: false });
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch categories';
+      set({ error: errorMessage, loading: false });
     }
   },
 
   addCategory: async (categoryData) => {
     set({ loading: true });
     try {
-      const response = await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoryData)
-      });
-
-      if (!response.ok) throw new Error('Failed to create category');
+      await axios.post('/api/categories', categoryData);
       
       // Refresh categories list
       get().fetchCategories();
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create category';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   },
@@ -587,20 +510,15 @@ export const useAdminStore = create((set, get) => ({
   updateCategory: async (categoryData) => {
     set({ loading: true });
     try {
-      const response = await fetch(`/api/categories/${categoryData.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoryData)
-      });
-
-      if (!response.ok) throw new Error('Failed to update category');
+      await axios.put(`/api/categories/${categoryData.id}`, categoryData);
       
       // Refresh categories list
       get().fetchCategories();
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update category';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   },
@@ -608,18 +526,15 @@ export const useAdminStore = create((set, get) => ({
   deleteCategory: async (categoryId) => {
     set({ loading: true });
     try {
-      const response = await fetch(`/api/categories/${categoryId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) throw new Error('Failed to delete category');
+      await axios.delete(`/api/categories/${categoryId}`);
       
       // Refresh categories list
       get().fetchCategories();
       set({ loading: false });
       return true;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete category';
+      set({ error: errorMessage, loading: false });
       return false;
     }
   }

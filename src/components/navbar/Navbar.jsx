@@ -1,32 +1,23 @@
 // components/layout/Navbar.jsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Navigation from './Navigation';
+import { useProductStore } from '@/lib/store';
 
 
 export default function Navbar({ initialCategories = [] }) {
-  const [categories, setCategories] = useState(initialCategories);
+  const { categories, fetchCategories } = useProductStore();
 
-  // Fetch categories from database (fallback for client-side navigation)
+  // Fetch categories with caching
   useEffect(() => {
-    // Only fetch if we don't have initial categories
-    if (initialCategories.length === 0) {
-      const fetchCategories = async () => {
-        try {
-          const response = await fetch('/api/categories');
-          if (response.ok) {
-            const data = await response.json();
-            setCategories(data);
-          }
-        } catch (error) {
-          console.error('Failed to fetch categories:', error);
-        }
-      };
-      fetchCategories();
-    }
-  }, [initialCategories.length]);
+    // Fetch categories (will use cache if available)
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Use store categories, fallback to initialCategories
+  const displayCategories = categories.length > 0 ? categories : initialCategories;
 
   return (
     <nav className="bg-background border-b sticky top-0 z-50">
@@ -41,7 +32,7 @@ export default function Navbar({ initialCategories = [] }) {
           </div>
 
           {/* NAVIGATION COMPONENT */}
-          <Navigation categories={categories} />
+          <Navigation categories={displayCategories} />
         </div>
       </div>
     </nav>

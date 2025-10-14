@@ -8,7 +8,7 @@ const StarButton = forwardRef(({ className, children, ...props }, ref) => {
     <button
       ref={ref}
       className={cn(
-        "star-button relative px-8 py-4 bg-white text-black text-lg font-semibold rounded-full border-none cursor-pointer transition-all duration-300 ease-in-out hover:bg-black hover:text-white hover:shadow-[0_0_80px_rgba(255,255,255,0.55)]",
+        "star-button relative px-8 py-4 bg-background text-foreground text-lg font-semibold rounded-full border-2 border-foreground cursor-pointer transition-all duration-300 ease-in-out hover:bg-foreground hover:text-background hover:shadow-[0_0_80px_rgba(255,255,255,0.55)] dark:hover:shadow-[0_0_80px_rgba(255,255,255,0.3)]",
         className
       )}
       {...props}

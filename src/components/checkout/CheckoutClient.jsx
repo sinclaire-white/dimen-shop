@@ -28,8 +28,8 @@ export default function CheckoutClient() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
   const { 
+    user,
     cart, 
     cartCount, 
     loading, 
@@ -39,69 +39,45 @@ export default function CheckoutClient() {
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
 
-  // Fetch user profile data
+  // Pre-fill form with user data from store
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!session) return;
+    if (!user) return;
+    
+    // Pre-fill form with user data
+    setValue('name', user.name || '');
+    setValue('email', user.email || '');
+    setValue('phone', user.phone || '');
+    
+    // If user has a saved address, parse and populate it
+    if (user.address) {
+      // Try to parse structured address (street, city, postal code)
+      const addressParts = user.address.split(',').map(part => part.trim());
       
-      try {
-        const response = await fetch('/api/user/profile');
-        if (response.ok) {
-          const profile = await response.json();
-          setUserProfile(profile);
-          
-          // Pre-fill form with user data
-          setValue('name', profile.name || '');
-          setValue('email', profile.email || '');
-          setValue('phone', profile.phone || '');
-          
-          // If user has a saved address, parse and populate it
-          if (profile.address) {
-            // Try to parse structured address (street, city, postal code)
-            const addressParts = profile.address.split(',').map(part => part.trim());
-            
-            if (addressParts.length === 1) {
-              // Single address string - put it all in address field
-              setValue('address', profile.address);
-            } else {
-              // Multiple parts - try to distribute them
-              setValue('address', addressParts[0] || '');
-              if (addressParts.length >= 2) {
-                setValue('city', addressParts[1] || '');
-              }
-              if (addressParts.length >= 3) {
-                // Look for postal code pattern (numbers)
-                const lastPart = addressParts[addressParts.length - 1];
-                if (/^\d+/.test(lastPart)) {
-                  setValue('postalCode', lastPart || '');
-                  // If there are more parts, use them for city
-                  if (addressParts.length > 3) {
-                    setValue('city', addressParts.slice(1, -1).join(', '));
-                  }
-                } else {
-                  setValue('city', addressParts.slice(1).join(', '));
-                }
-              }
-            }
-          }
-        } else {
-          console.warn('Failed to fetch user profile:', response.status);
-          // Fallback to session data if profile fetch fails
-          setValue('name', session.user?.name || '');
-          setValue('email', session.user?.email || '');
+      if (addressParts.length === 1) {
+        // Single address string - put it all in address field
+        setValue('address', user.address);
+      } else {
+        // Multiple parts - try to distribute them
+        setValue('address', addressParts[0] || '');
+        if (addressParts.length >= 2) {
+          setValue('city', addressParts[1] || '');
         }
-      } catch (error) {
-        console.error('Failed to fetch user profile:', error);
-        // Fallback to session data if profile fetch fails
-        setValue('name', session.user?.name || '');
-        setValue('email', session.user?.email || '');
+        if (addressParts.length >= 3) {
+          // Look for postal code pattern (numbers)
+          const lastPart = addressParts[addressParts.length - 1];
+          if (/^\d+/.test(lastPart)) {
+            setValue('postalCode', lastPart || '');
+            // If there are more parts, use them for city
+            if (addressParts.length > 3) {
+              setValue('city', addressParts.slice(1, -1).join(', '));
+            }
+          } else {
+            setValue('city', addressParts.slice(1).join(', '));
+          }
+        }
       }
-    };
-
-    if (session) {
-      fetchUserProfile();
     }
-  }, [session, setValue]);
+  }, [user, setValue]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {

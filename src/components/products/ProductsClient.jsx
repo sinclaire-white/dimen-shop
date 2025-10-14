@@ -17,7 +17,6 @@ export default function ProductsClient() {
   const { 
     products = [], 
     categories = [], 
-    loading, 
     fetchProducts, 
     fetchCategories 
   } = useProductStore();
@@ -69,30 +68,6 @@ export default function ProductsClient() {
         return new Date(b.createdAt) - new Date(a.createdAt);
     }
   });
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="h-8 bg-muted animate-pulse rounded-md w-64 mb-6" />
-          <div className="h-4 bg-muted animate-pulse rounded-md w-96 mb-8" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(9)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-muted rounded-lg mb-4" />
-                  <div className="h-4 bg-muted rounded mb-2" />
-                  <div className="h-4 bg-muted rounded w-2/3 mb-2" />
-                  <div className="h-6 bg-muted rounded w-1/3" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const containerVariants = {
     hidden: { opacity: 0 },

@@ -399,13 +399,6 @@ export default function Navigation({ categories }) {
                 <Link href="/" className="text-xl font-bold text-primary" onClick={handleMobileLinkClick}>
                   DimenShop
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
               </div>
 
               {/* CONTENT */}

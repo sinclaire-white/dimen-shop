@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import ProductsClient from '@/components/products/ProductsClient';
+import AnimatedLoader from '@/components/ui/AnimatedLoader/AnimatedLoader';
 
 export const metadata = {
   title: 'All Products | DimenShop',
@@ -11,5 +13,9 @@ export const metadata = {
 };
 
 export default function ProductsPage() {
-  return <ProductsClient />;
+  return (
+    <Suspense fallback={<AnimatedLoader />}>
+      <ProductsClient />
+    </Suspense>
+  );
 }

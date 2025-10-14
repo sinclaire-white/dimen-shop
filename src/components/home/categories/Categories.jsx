@@ -21,9 +21,9 @@ export default async function Categories() {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+    <section className="py-12 md:py-16 bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">Browse Categories</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Explore our organized collection of 3D models by category

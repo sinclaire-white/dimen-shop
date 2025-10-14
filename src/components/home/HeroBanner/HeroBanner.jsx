@@ -9,20 +9,21 @@ import AnimatedWrapper from './AnimatedWrapper';
 export default function HeroBanner() {
   return (
     <AnimatedWrapper> 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] py-20 px-4">
-        <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-center text-foreground font-sans tracking-tight mb-6">
-          Bring Imagination to Life
-          <div className="relative mx-auto inline-block w-max">
-           
-            <div className="py-4">
-              <span>with 3D Prints</span>
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] py-20">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-center text-foreground font-sans tracking-tight mb-6">
+            Bring Imagination to Life
+            <div className="relative mx-auto inline-block w-max">
+             
+              <div className="py-4">
+                <span>with 3D Prints</span>
+              </div>
             </div>
-          </div>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-8">
-          Custom 3D printed products—from characters to props. Fast, affordable, magical.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+            Custom 3D printed products—from characters to props. Fast, affordable, magical.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
           <Link href="/products" className="flex-1">
             <div className="group relative mx-auto flex items-center justify-center rounded-full px-4 sm:px-6 py-2.5 sm:py-3 bg-white dark:bg-white shadow-lg hover:shadow-xl transition-all duration-500 ease-out border border-gray-200 dark:border-gray-300">
               <span
@@ -73,6 +74,7 @@ export default function HeroBanner() {
               <ChevronRight className="ml-2 size-3 sm:size-4 stroke-gray-600 dark:stroke-gray-400 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
             </div>
           </Link>
+        </div>
         </div>
       </div>
     </AnimatedWrapper>

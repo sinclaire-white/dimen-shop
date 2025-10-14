@@ -1,13 +1,14 @@
 "use client";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 
 export default function DeleteConfirmationModal({ 
@@ -21,37 +22,35 @@ export default function DeleteConfirmationModal({
   confirmText = "Yes, Delete"
 }) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <DialogTitle>{title}</DialogTitle>
+            <AlertDialogTitle>{title}</AlertDialogTitle>
           </div>
-          <DialogDescription className="text-left">
+          <AlertDialogDescription className="text-left">
             {description}
             {itemName && (
               <span className="block mt-2 font-medium text-foreground">
                 &quot;{itemName}&quot;
               </span>
             )}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogCancel
             onClick={onClose}
             disabled={isLoading}
           >
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
-            className="gap-2 text-white font-medium"
+            className="gap-2 bg-red-600 hover:bg-red-700 text-white font-medium"
           >
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
@@ -64,9 +63,9 @@ export default function DeleteConfirmationModal({
                 {confirmText}
               </>
             )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

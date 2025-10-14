@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { StarButton } from '@/components/ui/star-button';
 import { useUserStore } from '@/lib/store';
 
@@ -20,22 +19,17 @@ export default function CTASection() {
           Join thousands of creators who trust DimenShop for their 3D printing needs.
           Start exploring our collection today.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <Link href="/products">
             <StarButton>
               Browse All Products
             </StarButton>
           </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-primary-foreground text-primary"
-            asChild
-          >
-            <Link href="/signup">
+          <Link href="/signup">
+            <StarButton>
               Create Account
-            </Link>
-          </Button>
+            </StarButton>
+          </Link>
         </div>
       </div>
     </section>

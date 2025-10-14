@@ -8,7 +8,6 @@ import { useProductStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Star } from "lucide-react";
-import { LoaderFour } from "@/components/ui/loader";
 import DeleteConfirmationModal from "@/components/modals/DeleteConfirmationModal";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -16,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 
 export function ProductsList() {
-  const { products = [], fetchProducts, loading } = useProductStore();
+  const { products = [], fetchProducts } = useProductStore();
   const { deleteProduct, categories = [], fetchCategories } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, product: null });
@@ -87,15 +86,8 @@ export function ProductsList() {
         className="pl-9 mb-2"
       />
 
-      {/* Loading state */}
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <LoaderFour />
-        </div>
-      )}
-
       {/* No products fallback */}
-      {!loading && filteredProducts.length === 0 && (
+      {filteredProducts.length === 0 && (
         <div className="text-center py-12">
           <h3 className="text-lg font-semibold text-foreground">
             No products added

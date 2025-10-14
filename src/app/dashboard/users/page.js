@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { UsersSearch } from '@/components/admin/UsersSearch';
 import { UsersGrid } from '@/components/admin/UsersGrid';
+import AnimatedLoader from '@/components/ui/AnimatedLoader/AnimatedLoader';
 
 export default function Users() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +22,9 @@ export default function Users() {
       <UsersSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
       {/* Users Grid */}
-      <UsersGrid searchTerm={searchTerm} />
+      <Suspense fallback={<AnimatedLoader />}>
+        <UsersGrid searchTerm={searchTerm} />
+      </Suspense>
     </div>
   );
 }

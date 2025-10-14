@@ -10,36 +10,11 @@ import { StarButton } from '@/components/ui/star-button';
 import { Star } from 'lucide-react';
 
 export function FeaturedProducts() {
-  const { featuredProducts, fetchFeaturedProducts, loading } = useProductStore();
+  const { featuredProducts, fetchFeaturedProducts } = useProductStore();
 
   useEffect(() => {
     fetchFeaturedProducts();
   }, [fetchFeaturedProducts]);
-
-  if (loading) {
-    return (
-      <section className="mt-16 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="h-8 bg-muted animate-pulse rounded-md w-64 mx-auto mb-4" />
-            <div className="h-4 bg-muted animate-pulse rounded-md w-96 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-muted rounded-lg mb-4" />
-                  <div className="h-4 bg-muted rounded mb-2" />
-                  <div className="h-4 bg-muted rounded w-2/3 mb-2" />
-                  <div className="h-6 bg-muted rounded w-1/3" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   if (!featuredProducts || featuredProducts.length === 0) {
     return (

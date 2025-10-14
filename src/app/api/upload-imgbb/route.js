@@ -35,7 +35,8 @@ async function uploadToImgBB(file, retries = 3, delay = 1000) {
         throw new Error(response.data.error?.message || 'ImgBB upload failed');
       }
 
-      return response.data.data.url;
+      // Use display_url for the full-size direct image URL
+      return response.data.data.display_url;
     } catch (error) {
       if (attempt === retries) {
         throw new Error(`ImgBB upload failed after ${retries} attempts: ${error.message}`);

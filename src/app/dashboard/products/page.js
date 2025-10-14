@@ -1,8 +1,10 @@
 
 // src/app/dashboard/products/page.js
 
+import { Suspense } from 'react';
 import { ProductsHeader } from '@/components/admin/ProductsHeader';
 import { ProductsList } from '@/components/admin/ProductsList';
+import AnimatedLoader from '@/components/ui/AnimatedLoader/AnimatedLoader';
 
 export default function Products() {
   return (
@@ -11,7 +13,9 @@ export default function Products() {
       <ProductsHeader />
       
       {/* Products List with integrated search */}
-      <ProductsList />
+      <Suspense fallback={<AnimatedLoader />}>
+        <ProductsList />
+      </Suspense>
     </div>
   );
 }

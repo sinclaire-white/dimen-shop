@@ -1,26 +1,29 @@
 "use client";
+import { Suspense } from 'react';
 import { useSyncedUser } from '@/lib/store';
 import AdminOrdersPage from '@/components/admin/AdminOrdersPage';
 import UserOrdersPage from '@/components/dashboard/UserOrdersPage';
+import AnimatedLoader from '@/components/ui/AnimatedLoader/AnimatedLoader';
 
 export default function OrdersPage() {
   const { user } = useSyncedUser();
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Loading...</h2>
-          <p className="text-muted-foreground">Please wait while we load your orders.</p>
-        </div>
-      </div>
-    );
+    return <AnimatedLoader />;
   }
 
   // Show different orders page based on user role
   if (user.role === 'admin') {
-    return <AdminOrdersPage />;
+    return (
+      <Suspense fallback={<AnimatedLoader />}>
+        <AdminOrdersPage />
+      </Suspense>
+    );
   }
 
-  return <UserOrdersPage />;
+  return (
+    <Suspense fallback={<AnimatedLoader />}>
+      <UserOrdersPage />
+    </Suspense>
+  );
 }

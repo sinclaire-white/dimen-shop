@@ -1,49 +1,48 @@
 "use client";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, LogOut } from 'lucide-react';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { LogOut } from 'lucide-react';
 
 export default function LogoutConfirmationModal({ isOpen, onClose, onConfirm, isLoading = false }) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
               <LogOut className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <DialogTitle>Confirm Logout</DialogTitle>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
           </div>
-          <DialogDescription className="text-left">
+          <AlertDialogDescription className="text-left">
             Are you sure you want to log out? You will need to sign in again to access your account.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogCancel
             onClick={onClose}
             disabled={isLoading}
           >
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
-            className="gap-2"
+            className="gap-2 bg-red-600 hover:bg-red-700 text-white"
           >
             <LogOut className="h-4 w-4" />
             {isLoading ? 'Logging out...' : 'Yes, Logout'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

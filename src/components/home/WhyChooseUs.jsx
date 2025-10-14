@@ -45,9 +45,9 @@ const features = [
 
 export function WhyChooseUs() {
 	return (
-		<section className="mt-16 bg-background">
-			<div className="container mx-auto px-4">
-				<div className="text-center mb-12">
+		<section className="py-12 md:py-16 bg-background">
+			<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+				<div className="text-center mb-8 md:mb-12">
 					<h2 className="text-3xl font-bold text-foreground mb-4">
 						Why Choose DimenShop?
 					</h2>
