@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Home, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -60,7 +61,16 @@ export default function DashboardHeader() {
                 <div className="flex flex-col h-full">
                   {/* Mobile Menu Header */}
                   <div className="p-6 border-b">
-                    <h2 className="text-xl font-bold text-foreground">DimenShop</h2>
+                    <Link href="/" className="flex items-center gap-3 mb-2 hover:opacity-80 transition-opacity">
+                      <Image 
+                        src="/dimen_shp_logo.png"
+                        alt="DimenShop Logo"
+                        width={35}
+                        height={35}
+                        className="object-contain"
+                      />
+                      <h2 className="text-xl font-bold text-foreground">DimenShop</h2>
+                    </Link>
                     <p className="text-sm text-muted-foreground">
                       {user?.role === 'admin' ? 'Admin Dashboard' : 'User Dashboard'}
                     </p>
@@ -105,9 +115,13 @@ export default function DashboardHeader() {
             <div className="hidden sm:block h-6 w-px bg-border" />
             
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary w-8 h-8 flex items-center justify-center">
-                <span className="font-bold text-primary-foreground text-sm">D</span>
-              </div>
+              <Image 
+                src="/dimen_shp_logo.png"
+                alt="DimenShop Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-foreground">DimenShop Dashboard</h1>
                 <p className="text-xs text-muted-foreground">Manage your store</p>

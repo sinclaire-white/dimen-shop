@@ -102,7 +102,7 @@ export function ProductsList() {
       )}
 
       {/* Product list */}
-      {!loading && filteredProducts.length > 0 && (
+      {filteredProducts.length > 0 && (
         <div className="grid gap-4">
           {filteredProducts.map((product) => (
             <Card

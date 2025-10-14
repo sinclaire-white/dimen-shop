@@ -59,7 +59,7 @@ const statusConfig = {
 };
 
 export default function AdminOrdersPage() {
-  const { orders, fetchOrders, updateOrderStatus } = useAdminStore();
+  const { orders = [], loading, fetchOrders, updateOrderStatus } = useAdminStore();
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +75,11 @@ export default function AdminOrdersPage() {
   }, [orders, searchTerm, statusFilter]);
 
   const filterOrders = () => {
+    if (!Array.isArray(orders)) {
+      setFilteredOrders([]);
+      return;
+    }
+
     let filtered = orders;
 
     if (searchTerm) {
@@ -162,7 +167,28 @@ export default function AdminOrdersPage() {
       </Card>
 
       {/* Orders List */}
-      {filteredOrders.length === 0 ? (
+      {loading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-5 bg-muted rounded w-32" />
+                    <div className="h-6 bg-muted rounded w-24" />
+                  </div>
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="flex gap-2">
+                    <div className="h-9 bg-muted rounded w-24" />
+                    <div className="h-9 bg-muted rounded w-24" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredOrders.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />

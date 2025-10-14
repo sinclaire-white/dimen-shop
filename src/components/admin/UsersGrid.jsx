@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useAdminStore } from '@/lib/store';
 
 export function UsersGrid({ searchTerm = '' }) {
-  const { users, fetchUsers } = useAdminStore();
+  const { users, loading, fetchUsers } = useAdminStore();
 
   useEffect(() => {
     fetchUsers();
@@ -22,6 +22,30 @@ export function UsersGrid({ searchTerm = '' }) {
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-muted rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-3 bg-muted rounded w-full" />
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="h-3 bg-muted rounded w-1/2" />
+                <div className="h-8 bg-muted rounded w-24" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   if (users.length === 0) {
     return (

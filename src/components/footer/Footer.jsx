@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import {
   Dialog,
@@ -144,10 +145,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-3 mb-4">
-              <div className="rounded-lg bg-primary w-10 h-10 flex items-center justify-center">
-                <span className="font-bold text-primary-foreground text-lg">D</span>
-              </div>
+            <Link href="/" className="inline-flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
+              <Image 
+                src="/dimen_shp_logo.png"
+                alt="DimenShop Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
               <span className="text-xl font-bold text-foreground">DimenShop</span>
             </Link>
             

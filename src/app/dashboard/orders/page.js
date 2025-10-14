@@ -1,5 +1,4 @@
 "use client";
-import { Suspense } from 'react';
 import { useSyncedUser } from '@/lib/store';
 import AdminOrdersPage from '@/components/admin/AdminOrdersPage';
 import UserOrdersPage from '@/components/dashboard/UserOrdersPage';
@@ -14,16 +13,8 @@ export default function OrdersPage() {
 
   // Show different orders page based on user role
   if (user.role === 'admin') {
-    return (
-      <Suspense fallback={<AnimatedLoader />}>
-        <AdminOrdersPage />
-      </Suspense>
-    );
+    return <AdminOrdersPage />;
   }
 
-  return (
-    <Suspense fallback={<AnimatedLoader />}>
-      <UserOrdersPage />
-    </Suspense>
-  );
+  return <UserOrdersPage />;
 }

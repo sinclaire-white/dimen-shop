@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSyncedUser } from '@/lib/store';
 import { signIn, signOut } from 'next-auth/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { ShinyButton } from '@/components/ui/shiny-button';
@@ -51,6 +53,7 @@ export default function Navigation({ categories }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -59,6 +62,7 @@ export default function Navigation({ categories }) {
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setMobileSearchOpen(false); // Close mobile search sheet
     }
   };
 
@@ -96,8 +100,8 @@ export default function Navigation({ categories }) {
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
+      {/* Desktop Navigation - Large screens only */}
+      <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
         <NavigationMenu>
           <NavigationMenuList>
             {navItems.map((item) => (
@@ -255,16 +259,15 @@ export default function Navigation({ categories }) {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 w-48 md:w-56 lg:w-64 bg-muted/50 border-0 focus:bg-background transition-colors"
-          />
-        </form>
+        {/* Search Bar - Cool Animated Modal for ALL Screens */}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setMobileSearchOpen(true)}
+          className="h-9 w-9"
+        >
+          <Search className="h-5 w-5" />
+        </Button>
 
         {/* Theme Toggle */}
         <ThemeToggle />
@@ -361,14 +364,14 @@ export default function Navigation({ categories }) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <div className="flex space-x-2">
+          <div className="flex space-x-1 md:space-x-2">
             <Link href="/signup">
-              <ShinyButton variant="outline" size="sm">
+              <ShinyButton variant="outline" size="sm" className="whitespace-nowrap px-3 md:px-4 lg:px-6 text-xs md:text-sm">
                 Sign Up
               </ShinyButton>
             </Link>
             <Link href="/login">
-              <ShinyButton size="sm">
+              <ShinyButton size="sm" className="whitespace-nowrap px-3 md:px-4 lg:px-6 text-xs md:text-sm">
                 Login
               </ShinyButton>
             </Link>
@@ -376,10 +379,14 @@ export default function Navigation({ categories }) {
         )}
       </div>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden flex items-center space-x-2">
-        {/* Mobile Search Trigger */}
-        <Button variant="ghost" size="icon">
+      {/* Mobile & Medium Navigation */}
+      <div className="lg:hidden flex items-center space-x-2">
+        {/* Mobile Search Trigger - Opens Cool Animated Modal */}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setMobileSearchOpen(true)}
+        >
           <Search className="h-5 w-5" />
         </Button>
 
@@ -396,8 +403,21 @@ export default function Navigation({ categories }) {
             <div className="flex flex-col h-full">
               {/* HEADER */}
               <div className="flex items-center justify-between p-4 border-b">
-                <Link href="/" className="text-xl font-bold text-primary" onClick={handleMobileLinkClick}>
-                  DimenShop
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity" 
+                  onClick={handleMobileLinkClick}
+                >
+                  <Image 
+                    src="/dimen_shp_logo.png"
+                    alt="DimenShop Logo"
+                    width={35}
+                    height={35}
+                    className="object-contain"
+                  />
+                  <span className="text-lg font-bold text-primary">
+                    DimenShop
+                  </span>
                 </Link>
               </div>
 
@@ -615,6 +635,116 @@ export default function Navigation({ categories }) {
         onConfirm={confirmLogout}
         isLoading={isLoggingOut}
       />
+
+      {/* Cool Animated Search Modal */}
+      <AnimatePresence>
+        {mobileSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileSearchOpen(false)}
+          >
+            <motion.div
+              initial={{ y: -100, opacity: 0, scale: 0.9 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -100, opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute top-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[500px] lg:w-[600px] bg-background rounded-2xl shadow-2xl border overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                >
+                  <Search className="h-5 w-5 text-primary" />
+                </motion.div>
+                <h2 className="text-xl font-bold">Search Products</h2>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileSearchOpen(false)}
+                className="rounded-full"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Search Form */}
+            <div className="p-6">
+              <form onSubmit={handleSearch} className="space-y-4">
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="relative"
+                >
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    autoFocus
+                    placeholder="What are you looking for?"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 pr-4 h-14 text-lg rounded-xl border-2 focus:border-primary transition-all"
+                  />
+                </motion.div>
+                
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base rounded-xl font-semibold"
+                    disabled={!searchQuery.trim()}
+                  >
+                    <Search className="mr-2 h-5 w-5" />
+                    Search Now
+                  </Button>
+                </motion.div>
+              </form>
+
+              {/* Popular Searches (Optional) */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6"
+              >
+                <p className="text-sm text-muted-foreground mb-3">Popular searches:</p>
+                <div className="flex flex-wrap gap-2">
+                  {['3D Prints', 'Miniatures', 'Art', 'Sculptures'].map((term, index) => (
+                    <motion.button
+                      key={term}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.4 + index * 0.05 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setSearchQuery(term);
+                        handleSearch({ preventDefault: () => {} });
+                      }}
+                      className="px-4 py-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors text-sm font-medium"
+                    >
+                      {term}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
