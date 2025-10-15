@@ -54,8 +54,8 @@ export default function LoginPage() {
       } else {
         // Force session update and redirect
         await getSession();
-        router.push('/');
-        router.refresh();
+        // Use window.location for more reliable mobile redirect
+        window.location.href = '/';
       }
     } catch (error) {
       setError('An unexpected error occurred');

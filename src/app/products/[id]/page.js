@@ -6,8 +6,9 @@ import { ObjectId } from 'mongodb';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart, Star, Package, Clock, Ruler, Palette } from 'lucide-react';
+import { Star, Package, Clock, Ruler, Palette } from 'lucide-react';
+import AddToCartButton from '@/components/cart/AddToCartButton';
+import BuyNowButton from '@/components/cart/BuyNowButton';
 
 // Enable ISR - Revalidate every 30 minutes (products change more frequently)
 export const revalidate = 1800;
@@ -176,14 +177,10 @@ export default async function ProductPage({ params }) {
 
               {/* Purchase Section */}
               <div className="space-y-4">
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  disabled={product.stock === 0}
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                </Button>
+                <div className="flex gap-2">
+                  <AddToCartButton product={product} size="lg" className="flex-1" />
+                  <BuyNowButton product={product} size="lg" className="flex-1" />
+                </div>
                 
                 <p className="text-xs text-muted-foreground text-center">
                   Digital download available after purchase

@@ -27,6 +27,7 @@ export default function AddToCartButton({ product, size = "sm", className = "" }
 
   return (
     <Button
+      type="button"
       size={size}
       disabled={product.stock === 0}
       className={cn(
