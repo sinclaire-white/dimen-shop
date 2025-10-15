@@ -19,7 +19,7 @@ export default function CTASection() {
           Join thousands of creators who trust DimenShop for their 3D printing needs.
           Start exploring our collection today.
         </p>
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-12 justify-center items-center">
           <Link href="/products">
             <StarButton>
               Browse All Products

@@ -602,12 +602,16 @@ export default function Navigation({ categories }) {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <ShinyButton asChild className="w-full" onClick={handleMobileLinkClick}>
-                      <Link href="/login">Login</Link>
-                    </ShinyButton>
-                    <ShinyButton asChild variant="outline" className="w-full" onClick={handleMobileLinkClick}>
-                      <Link href="/signup">Sign Up</Link>
-                    </ShinyButton>
+                    <Link href="/login" className="block" onClick={handleMobileLinkClick}>
+                      <ShinyButton className="w-full">
+                        Login
+                      </ShinyButton>
+                    </Link>
+                    <Link href="/signup" className="block" onClick={handleMobileLinkClick}>
+                      <ShinyButton variant="outline" className="w-full">
+                        Sign Up
+                      </ShinyButton>
+                    </Link>
                     <div className="relative my-2">
                       <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-border" />
@@ -616,7 +620,7 @@ export default function Navigation({ categories }) {
                         <span className="bg-background px-2 text-muted-foreground">Or</span>
                       </div>
                     </div>
-                    <Button variant="outline" onClick={handleGoogleSignIn} className="w-full">
+                    <Button type="button" variant="outline" onClick={handleGoogleSignIn} className="w-full">
                       Continue with Google
                     </Button>
                   </div>
