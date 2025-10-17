@@ -12,6 +12,9 @@ export const metadata = {
   },
 };
 
+// Enable ISR - Revalidate every 12 hours
+export const revalidate = 43200;
+
 export default function ProductsPage() {
   return (
     <Suspense fallback={<AnimatedLoader />}>

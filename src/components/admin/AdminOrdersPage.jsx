@@ -21,7 +21,7 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import Image from 'next/image';
+
 import { toast } from 'sonner';
 import { useAdminStore } from '@/lib/store';
 
@@ -381,11 +381,11 @@ export default function AdminOrdersPage() {
                             {order.items?.map((item, index) => (
                               <div key={index} className="flex gap-3 p-3 bg-muted/30 rounded-lg">
                                 <div className="relative w-12 h-12 bg-muted rounded overflow-hidden">
-                                  <Image
+                                  <img
                                     src={item.product?.images?.[0] || '/placeholder.png'}
                                     alt={item.product?.name || 'Product'}
-                                    fill
-                                    className="object-cover"
+                                    
+                                    className="w-full h-full object-cover"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">

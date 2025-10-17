@@ -5,8 +5,8 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import CategoryPageClient from '@/components/categories/CategoryPageClient';
 
-// Enable ISR - Revalidate every hour
-export const revalidate = 3600;
+// Enable ISR - Revalidate every 24 hours (1 day)
+export const revalidate = 86400;
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }) {

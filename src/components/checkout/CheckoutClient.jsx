@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
+
 import { motion } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,11 +39,11 @@ export default function CheckoutClient() {
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
 
-  // Pre-fill form with user data from store
+  // Pre-form with user data from store
   useEffect(() => {
     if (!user) return;
     
-    // Pre-fill form with user data
+    // Pre-form with user data
     setValue('name', user.name || '');
     setValue('email', user.email || '');
     setValue('phone', user.phone || '');
@@ -201,7 +201,7 @@ export default function CheckoutClient() {
                       {userProfile && (
                         <Badge variant="secondary" className="ml-auto">
                           <Check className="h-3 w-3 mr-1" />
-                          Auto-filled
+                          Auto-ed
                         </Badge>
                       )}
                     </CardTitle>
@@ -364,11 +364,11 @@ export default function CheckoutClient() {
                       {cart?.map((item) => (
                         <div key={item.product._id} className="flex gap-3 p-3 border border-muted rounded-lg">
                           <div className="relative w-16 h-16 bg-muted rounded overflow-hidden">
-                            <Image
+                            <img
                               src={item.product.images?.[0] || '/placeholder.png'}
                               alt={item.product.name || 'Product'}
-                              fill
-                              className="object-cover"
+                              
+                              className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

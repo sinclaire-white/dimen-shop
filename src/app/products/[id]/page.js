@@ -3,15 +3,14 @@
 import { notFound } from 'next/navigation';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Package, Clock, Ruler, Palette } from 'lucide-react';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import BuyNowButton from '@/components/cart/BuyNowButton';
 
-// Enable ISR - Revalidate every 30 minutes (products change more frequently)
-export const revalidate = 1800;
+// Enable ISR - Revalidate every 12 hours
+export const revalidate = 43200;
 
 async function getProduct(id) {
   try {
@@ -76,12 +75,10 @@ export default async function ProductPage({ params }) {
           <div className="space-y-4">
             <div className="aspect-square relative bg-muted rounded-lg overflow-hidden">
               {product.images && product.images[0] ? (
-                <Image
+                <img
                   src={product.images[0]}
                   alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -95,11 +92,10 @@ export default async function ProductPage({ params }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {product.images.slice(1, 5).map((image, index) => (
                   <div key={index} className="aspect-square relative bg-muted rounded-lg overflow-hidden">
-                    <Image
+                    <img
                       src={image}
                       alt={`${product.name} ${index + 2}`}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 ))}

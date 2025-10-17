@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { ArrowLeft, Home, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -62,12 +62,12 @@ export default function DashboardHeader() {
                   {/* Mobile Menu Header */}
                   <div className="p-6 border-b">
                     <Link href="/" className="flex items-center gap-3 mb-2 hover:opacity-80 transition-opacity">
-                      <Image 
+                      <img 
                         src="/dimen_shp_logo.png"
                         alt="DimenShop Logo"
                         width={35}
                         height={35}
-                        className="object-contain"
+                        className="w-full h-full object-contain"
                       />
                       <h2 className="text-xl font-bold text-foreground">DimenShop</h2>
                     </Link>
@@ -115,12 +115,12 @@ export default function DashboardHeader() {
             <div className="hidden sm:block h-6 w-px bg-border" />
             
             <div className="flex items-center gap-3">
-              <Image 
+              <img 
                 src="/dimen_shp_logo.png"
                 alt="DimenShop Logo"
                 width={32}
                 height={32}
-                className="object-contain"
+                className="w-full h-full object-contain"
               />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-foreground">DimenShop Dashboard</h1>

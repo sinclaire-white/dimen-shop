@@ -235,7 +235,7 @@ export const useProductStore = create((set, get) => ({
   // Cache timestamps to avoid unnecessary API calls
   lastProductsFetch: null,
   lastCategoriesFetch: null,
-  cacheTimeout: 5 * 60 * 1000, // 5 minutes
+  cacheTimeout: 24 * 60 * 60 * 1000, // 24 hours (1 day)
 
   // Fetch products with caching
   fetchProducts: async (filters = {}) => {

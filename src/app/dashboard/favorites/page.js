@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Heart, ShoppingCart, Trash2, Package } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 
 export default function FavoritesPage() {
   const { user, favorites, isLoading, fetchFavorites, removeFromFavorites } = useSyncedUser();
@@ -97,10 +97,10 @@ export default function FavoritesPage() {
                   {/* Product Image */}
                   <div className="relative aspect-square overflow-hidden rounded-t-lg">
                     {product.images && product.images[0] ? (
-                      <Image
+                      <img
                         src={product.images[0]}
                         alt={product.name}
-                        fill
+                        
                         className="object-cover group-hover:scale-105 transition-transform duration-200"
                       />
                     ) : (

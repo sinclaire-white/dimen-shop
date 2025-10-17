@@ -8,7 +8,7 @@ import { Package } from 'lucide-react';
 async function fetchCategories() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   try {
-    const res = await fetch(`${baseUrl}/api/categories`, { cache: 'force-cache', next: { revalidate: 3600 } });
+    const res = await fetch(`${baseUrl}/api/categories`, { cache: 'force-cache', next: { revalidate: 86400 } }); // 24 hours
     return res.ok ? await res.json() : [];
   } catch {
     return [];

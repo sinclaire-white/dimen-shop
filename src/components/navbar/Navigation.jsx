@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSyncedUser } from '@/lib/store';
 import { signIn, signOut } from 'next-auth/react';
@@ -408,11 +407,11 @@ export default function Navigation({ categories }) {
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity" 
                   onClick={handleMobileLinkClick}
                 >
-                  <Image 
+                  <img 
                     src="/dimen_shp_logo.png"
                     alt="DimenShop Logo"
-                    width={35}
-                    height={35}
+                    width="35"
+                    height="35"
                     className="object-contain"
                   />
                   <span className="text-lg font-bold text-primary">
@@ -462,16 +461,16 @@ export default function Navigation({ categories }) {
               {/* Categories */}
               <div className="border-t pt-4">
                 <div className="px-4 mb-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide">Categories</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Categories</h3>
                 </div>
 
                 {mobileSubmenu === 'categories' ? (
-                  <div className="space-y-1">
+                  <div className="space-y-1 animate-in slide-in-from-right duration-200">
                     <button
                       onClick={() => setMobileSubmenu(null)}
-                      className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
                     >
-                      <ChevronDown className="h-4 w-4 mr-2 rotate-180" /> Back to Menu
+                      <ChevronDown className="h-4 w-4 mr-2 rotate-180" /> Back
                     </button>
                     {categories.length > 0 ? (
                       categories.map((category) => (
@@ -505,16 +504,16 @@ export default function Navigation({ categories }) {
               {user && (
                 <div className="border-t pt-4">
                   <div className="px-4 mb-2">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide">Dashboard</h3>
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Dashboard</h3>
                   </div>
 
                   {mobileSubmenu === 'dashboard' ? (
-                    <div className="space-y-1">
+                    <div className="space-y-1 animate-in slide-in-from-right duration-200">
                       <button
                         onClick={() => setMobileSubmenu(null)}
-                        className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
                       >
-                        <ChevronDown className="h-4 w-4 mr-2 rotate-180" /> Back to Menu
+                        <ChevronDown className="h-4 w-4 mr-2 rotate-180" /> Back
                       </button>
                       {user.role === 'admin' ? (
                         <>

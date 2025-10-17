@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
@@ -199,11 +198,10 @@ export default function CartClient() {
                           <div className="flex gap-4 p-4 border border-muted rounded-lg">
                             {/* Product Image */}
                             <div className="relative w-20 h-20 bg-muted rounded-lg overflow-hidden">
-                              <Image
+                              <img
                                 src={item.product.images?.[0] || '/placeholder.png'}
                                 alt={item.product.name || 'Product'}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover"
                               />
                             </div>
 

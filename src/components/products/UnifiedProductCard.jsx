@@ -1,7 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +22,16 @@ export default function UnifiedProductCard({
 }) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageKey, setImageKey] = useState(product.images?.[0]);
+
+  // Reset loading state when product image changes
+  useEffect(() => {
+    const newImageSrc = product.images?.[0];
+    if (newImageSrc !== imageKey) {
+      setIsImageLoading(true);
+      setImageKey(newImageSrc);
+    }
+  }, [product.images, imageKey]);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -48,20 +57,26 @@ export default function UnifiedProductCard({
           {/* Product Image */}
           <div className="relative overflow-hidden aspect-square bg-muted/50">
             <Link href={`/products/${product._id}`} className="block w-full h-full relative">
-              <Image
+              <img
+                key={imageKey}
                 src={product.images?.[0] || '/placeholder.png'}
                 alt={product.name}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 className={cn(
-                  "object-cover transition-all duration-300",
-                  isHovered && "scale-105"
+                  "w-full h-full object-cover transition-all duration-500",
+                  isImageLoading && "scale-110 blur-sm opacity-0",
+                  !isImageLoading && "scale-100 blur-0 opacity-100",
+                  isHovered && !isImageLoading && "scale-105"
                 )}
+                loading="lazy"
                 onLoad={() => setIsImageLoading(false)}
                 onError={() => setIsImageLoading(false)}
               />
               {isImageLoading && (
-                <div className="absolute inset-0 bg-muted animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-br from-muted via-muted/80 to-muted/60 animate-pulse">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-muted-foreground/20 border-t-primary rounded-full animate-spin" />
+                  </div>
+                </div>
               )}
             </Link>
 

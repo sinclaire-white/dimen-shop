@@ -1,7 +1,6 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { signOut } from 'next-auth/react';
@@ -77,11 +76,11 @@ function SidebarContent({ onItemClick }) {
       {/* Header with Logo */}
       <div className="p-6 border-b">
         <Link href="/" className="flex items-center gap-3 mb-2 hover:opacity-80 transition-opacity">
-          <Image 
+          <img 
             src="/dimen_shp_logo.png"
             alt="DimenShop Logo"
-            width={40}
-            height={40}
+            width="40"
+            height="40"
             className="object-contain"
           />
           <h2 className="text-xl font-bold text-foreground">DimenShop</h2>

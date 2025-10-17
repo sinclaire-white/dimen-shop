@@ -21,6 +21,9 @@ export const metadata = {
   },
 };
 
+// Enable ISR - Revalidate every 6 hours (homepage can be more dynamic)
+export const revalidate = 21600;
+
 // Skeleton component for products
 function ProductsSkeleton() {
   return (
