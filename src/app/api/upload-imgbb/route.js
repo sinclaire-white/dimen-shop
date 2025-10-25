@@ -47,18 +47,30 @@ async function uploadToImgBB(file, retries = 3, delay = 1000) {
   }
 }
 
-// POST: Upload images to ImgBB (admin only)
+// POST: Upload images to ImgBB (authenticated users only)
 export async function POST(request) {
-  // Check for admin authentication
+  // Check for authentication (any logged-in user can upload)
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized - Please log in' }, { status: 401 });
   }
 
   try {
     // Parse form data
     const formData = await request.formData();
-    const files = formData.getAll('images');
+    
+    // Support both 'image' (single) and 'images' (multiple) field names
+    let files = formData.getAll('images');
+    if (files.length === 0) {
+      const singleFile = formData.get('image');
+      if (singleFile) {
+        files = [singleFile];
+      }
+    }
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: 'No image file provided' }, { status: 400 });
+    }
 
     // Validate files
     const fileData = files.map(file => ({
@@ -81,6 +93,11 @@ export async function POST(request) {
       uploadedUrls.push(url);
     }
 
+    // Return single URL if only one file, array if multiple
+    if (uploadedUrls.length === 1) {
+      return NextResponse.json({ url: uploadedUrls[0], urls: uploadedUrls }, { status: 200 });
+    }
+    
     // Return uploaded image URLs
     return NextResponse.json({ urls: uploadedUrls }, { status: 200 });
   } catch (error) {

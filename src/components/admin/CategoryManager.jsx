@@ -23,14 +23,13 @@ import {
 import { toast } from 'sonner';
 
 export function CategoryManager() {
-  const { 
-    categories = [], 
-    loading, 
-    fetchCategories, 
-    addCategory, 
-    updateCategory, 
-    deleteCategory 
-  } = useAdminStore();
+  // Use proper Zustand selectors to ensure re-renders
+  const categories = useAdminStore((state) => state.categories);
+  const loading = useAdminStore((state) => state.loading);
+  const fetchCategories = useAdminStore((state) => state.fetchCategories);
+  const addCategory = useAdminStore((state) => state.addCategory);
+  const updateCategory = useAdminStore((state) => state.updateCategory);
+  const deleteCategory = useAdminStore((state) => state.deleteCategory);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -215,7 +214,7 @@ export function CategoryManager() {
       </motion.div>
 
       {/* Categories Grid */}
-      <motion.div variants={itemVariants}>
+      <div>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(6)].map((_, i) => (
@@ -229,19 +228,13 @@ export function CategoryManager() {
             ))}
           </div>
         ) : filteredCategories.length > 0 ? (
-          <motion.div
-            variants={containerVariants}
+          <div
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6"
           >
-            <AnimatePresence>
-              {filteredCategories.map((category) => (
-                <motion.div
+            {filteredCategories.map((category, index) => {
+              return (
+                <div
                   key={category._id}
-                  variants={itemVariants}
-                  layout
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
                 >
                   <Card className="h-full flex flex-col transition-all duration-200 hover:shadow-md">
                     <CardHeader className="pb-3">
@@ -282,10 +275,10 @@ export function CategoryManager() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <Card className="text-center py-12">
             <CardContent>
@@ -308,7 +301,7 @@ export function CategoryManager() {
             </CardContent>
           </Card>
         )}
-      </motion.div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

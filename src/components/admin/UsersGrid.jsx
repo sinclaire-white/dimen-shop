@@ -6,12 +6,22 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Calendar, Package, Users as UsersIcon } from 'lucide-react';
+import { Mail, Calendar, Package, Users as UsersIcon, X, MapPin, Phone, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdminStore } from '@/lib/store';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { format } from 'date-fns';
 
 export function UsersGrid({ searchTerm = '' }) {
   const { users, loading, fetchUsers } = useAdminStore();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -22,6 +32,16 @@ export function UsersGrid({ searchTerm = '' }) {
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewDetails = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedUser(null), 200);
+  };
 
   if (loading) {
     return (
@@ -137,13 +157,134 @@ export function UsersGrid({ searchTerm = '' }) {
                   {user.role}
                 </Badge>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => handleViewDetails(user)}>
                 View Details
               </Button>
             </div>
           </CardContent>
         </Card>
       ))}
+
+      {/* User Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              Complete information about this user
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="space-y-6">
+              {/* User Header */}
+              <div className="flex items-center space-x-4 pb-4 border-b">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                  {selectedUser.image ? (
+                    <img 
+                      src={selectedUser.image} 
+                      alt={selectedUser.name} 
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-medium text-primary">
+                      {selectedUser.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold">{selectedUser.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant={selectedUser.status === 'Active' ? 'default' : 'secondary'}>
+                      {selectedUser.status}
+                    </Badge>
+                    <Badge variant="outline" className="capitalize">
+                      {selectedUser.role}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase">Contact Information</h4>
+                  
+                  <div className="flex items-start space-x-3">
+                    <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Email</p>
+                      <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                    </div>
+                  </div>
+
+                  {selectedUser.phone && (
+                    <div className="flex items-start space-x-3">
+                      <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Phone</p>
+                        <p className="text-sm text-muted-foreground">{selectedUser.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedUser.address && (
+                    <div className="flex items-start space-x-3">
+                      <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Address</p>
+                        <p className="text-sm text-muted-foreground">{selectedUser.address}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase">Account Information</h4>
+                  
+                  <div className="flex items-start space-x-3">
+                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Member Since</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedUser.createdAt 
+                          ? format(new Date(selectedUser.createdAt), 'PPP')
+                          : selectedUser.joinDate || 'N/A'
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <Package className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Total Orders</p>
+                      <p className="text-sm text-muted-foreground">{selectedUser.orders || 0}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">User ID</p>
+                      <p className="text-sm text-muted-foreground font-mono">{selectedUser._id}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Info */}
+              {selectedUser.bio && (
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase mb-2">Bio</h4>
+                  <p className="text-sm">{selectedUser.bio}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

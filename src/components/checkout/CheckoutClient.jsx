@@ -139,7 +139,6 @@ export default function CheckoutClient() {
       router.push('/dashboard/orders');
     } catch (error) {
       toast.error(error.message || 'Failed to place order');
-      console.error('Checkout error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -198,16 +197,16 @@ export default function CheckoutClient() {
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="h-5 w-5" />
                       Shipping Information
-                      {userProfile && (
+                      {user && (
                         <Badge variant="secondary" className="ml-auto">
                           <Check className="h-3 w-3 mr-1" />
-                          Auto-ed
+                          Auto-filled
                         </Badge>
                       )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {userProfile && (
+                    {user && (
                       <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg mb-4">
                         <Check className="h-4 w-4 text-green-600" />
                         <p className="text-sm text-green-700 dark:text-green-300">

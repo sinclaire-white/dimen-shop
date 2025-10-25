@@ -79,9 +79,7 @@ function SidebarContent({ onItemClick }) {
           <img 
             src="/dimen_shp_logo.png"
             alt="DimenShop Logo"
-            width="40"
-            height="40"
-            className="object-contain"
+            className="w-10 h-10 object-contain flex-shrink-0"
           />
           <h2 className="text-xl font-bold text-foreground">DimenShop</h2>
         </Link>

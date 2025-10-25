@@ -46,6 +46,13 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please log in to update your profile');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {

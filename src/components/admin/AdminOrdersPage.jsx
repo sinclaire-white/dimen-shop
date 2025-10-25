@@ -274,11 +274,11 @@ export default function AdminOrdersPage() {
                                 )}
                               </Button>
                               <Button
-                                variant="destructive"
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleUpdateOrderStatus(order._id, 'cancelled')}
                                 disabled={isUpdating}
-                                className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
+                                className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                               >
                                 {isUpdating ? (
                                   <div className="flex items-center justify-center gap-2">
@@ -287,7 +287,7 @@ export default function AdminOrdersPage() {
                                   </div>
                                 ) : (
                                   <>
-                                    <XCircle className="w-4 h-4 mr-1 text-white" />
+                                    <XCircle className="w-4 h-4 mr-1" />
                                     Decline
                                   </>
                                 )}
@@ -312,11 +312,11 @@ export default function AdminOrdersPage() {
                                 )}
                               </Button>
                               <Button
-                                variant="destructive"
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleUpdateOrderStatus(order._id, 'cancelled')}
                                 disabled={isUpdating}
-                                className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-medium"
+                                className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                               >
                                 {isUpdating ? (
                                   <div className="flex items-center justify-center gap-2">
@@ -325,7 +325,7 @@ export default function AdminOrdersPage() {
                                   </div>
                                 ) : (
                                   <>
-                                    <XCircle className="w-4 h-4 mr-1 text-white" />
+                                    <XCircle className="w-4 h-4 mr-1" />
                                     Decline
                                   </>
                                 )}
@@ -363,8 +363,16 @@ export default function AdminOrdersPage() {
                       )}
                       
                       {order.status === 'cancelled' && (
-                        <Badge variant="destructive" className="self-start">
+                        <Badge className="self-start bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-200 dark:border-red-800">
+                          <XCircle className="w-3 h-3 mr-1" />
                           Order Cancelled
+                        </Badge>
+                      )}
+
+                      {order.status === 'delivered' && (
+                        <Badge className="self-start bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-200 dark:border-green-800">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Order Delivered
                         </Badge>
                       )}
                     </div>

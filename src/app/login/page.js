@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserCog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -37,6 +39,11 @@ export default function LoginPage() {
       password: '',
     },
   });
+
+  const fillAdminCredentials = () => {
+    setValue('email', 'valluk@sada.com');
+    setValue('password', 'Valluk1234!@#$');
+  };
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -91,9 +98,20 @@ export default function LoginPage() {
         <Card className="relative w-full max-w-md mx-auto overflow-hidden">
           <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center text-foreground">
-              Welcome back
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl text-foreground">
+                Welcome back
+              </CardTitle>
+              <button
+                type="button"
+                onClick={fillAdminCredentials}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border border-muted-foreground/20 bg-transparent hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all duration-200"
+                title="Fill admin credentials"
+              >
+                <UserCog className="w-3.5 h-3.5" />
+                <span>Admin</span>
+              </button>
+            </div>
             <CardDescription className="text-center text-muted-foreground">
               Enter your credentials to access your account
             </CardDescription>

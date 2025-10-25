@@ -48,6 +48,7 @@ export const useUserStore = create((set, get) => ({
       set({ user: updatedUser, isLoading: false });
       return updatedUser;
     } catch (error) {
+      console.error('Profile update failed:', error.response?.data || error.message);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
       set({ error: errorMessage, isLoading: false });
       throw new Error(errorMessage);
@@ -374,7 +375,7 @@ export const useAdminStore = create((set, get) => ({
     set({ loading: true });
     try {
       const response = await axios.get('/api/admin/users');
-      set({ users: response.data, loading: false });
+      set({ users: response.data.users, loading: false });
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch users';
       set({ error: errorMessage, loading: false });
@@ -386,7 +387,7 @@ export const useAdminStore = create((set, get) => ({
     set({ loading: true });
     try {
       const response = await axios.get('/api/admin/orders');
-      set({ orders: response.data, loading: false });
+      set({ orders: Array.isArray(response.data.orders) ? response.data.orders : [], loading: false });
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch orders';
       set({ error: errorMessage, loading: false });
@@ -483,11 +484,13 @@ export const useAdminStore = create((set, get) => ({
   fetchCategories: async () => {
     set({ loading: true });
     try {
-      const response = await axios.get('/api/categories');
-      set({ categories: response.data, loading: false });
+      const response = await axios.get('/api/categories?limit=100');
+      // API returns an array directly, not wrapped in an object
+      const categoriesData = Array.isArray(response.data) ? response.data : [];
+      set({ categories: categoriesData, loading: false });
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch categories';
-      set({ error: errorMessage, loading: false });
+      set({ error: errorMessage, loading: false, categories: [] });
     }
   },
 
@@ -582,21 +585,46 @@ export const useSyncedUser = () => {
   const { updateUser, clearUser, setLoading } = useUserStore();
 
   useEffect(() => {
-    if (status === 'loading') {
-      setLoading(true);
-    } else if (status === 'authenticated' && session?.user) {
-      setLoading(false);
-      updateUser({
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.name,
-        role: session.user.role || 'user',
-        image: session.user.image,
-      });
-    } else if (status === 'unauthenticated') {
-      setLoading(false);
-      clearUser();
-    }
+    const syncUser = async () => {
+      if (status === 'loading') {
+        setLoading(true);
+      } else if (status === 'authenticated' && session?.user) {
+        setLoading(true);
+        
+        try {
+          // Fetch full user profile from database to get all fields
+          const response = await axios.get('/api/user/profile');
+          const fullUser = response.data;
+          
+          updateUser({
+            id: fullUser.id || session.user.id,
+            email: fullUser.email || session.user.email,
+            name: fullUser.name || session.user.name,
+            role: fullUser.role || session.user.role || 'user',
+            image: fullUser.image || session.user.image,
+            phone: fullUser.phone || null,
+            address: fullUser.address || null,
+          });
+        } catch (error) {
+          console.error('Failed to fetch full user profile, using session data:', error);
+          // Fallback to session data if API call fails
+          updateUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name,
+            role: session.user.role || 'user',
+            image: session.user.image,
+          });
+        } finally {
+          setLoading(false);
+        }
+      } else if (status === 'unauthenticated') {
+        setLoading(false);
+        clearUser();
+      }
+    };
+
+    syncUser();
   }, [status, session, updateUser, clearUser, setLoading]);
 
   return useUserStore();
