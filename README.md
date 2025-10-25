@@ -199,28 +199,6 @@ Admins have full control over the store.
 
 ---
 
-## 📦 Project Folder Structure
-
-```
-dimenshop/
-├── src/
-│   ├── app/                    # All pages
-│   │   ├── page.js            # Homepage
-│   │   ├── products/          # Products pages
-│   │   ├── dashboard/         # Dashboard pages
-│   │   └── api/               # Backend APIs
-│   ├── components/            # Reusable UI pieces
-│   │   ├── navbar/           # Navigation bar
-│   │   ├── footer/           # Footer
-│   │   ├── admin/            # Admin components
-│   │   └── ui/               # UI components
-│   └── lib/                   # Helper functions
-├── public/                    # Images and assets
-└── .env.local                # Your secrets (not in repo)
-```
-
----
-
 ## 🌟 Cool Features Explained
 
 ### 🔍 Animated Search Modal
@@ -257,41 +235,11 @@ Remembers your choice!
 
 ---
 
-## 🚀 Deploying Your Own
 
-### Option 1: Vercel (Easiest)
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Click "New Project"
-4. Import your GitHub repo
-5. Add environment variables
-6. Click Deploy!
 
-### Option 2: Any Host
-```bash
-npm run build
-npm start
-```
 
 ---
 
-## 💡 Tips for Using DimenShop
-
-### For Store Owners
-1. **Add Categories First** - Before adding products, create your categories
-2. **Use Good Images** - Products with clear images sell better
-3. **Mark Bestsellers as Featured** - Showcase your top products on homepage
-4. **Update Order Status** - Keep customers informed about their orders
-
-### For Developers
-1. **Environment Variables** - Never commit `.env.local` to git
-2. **MongoDB** - Use MongoDB Atlas free tier for testing
-3. **Images** - ImgBB has a free tier for image hosting
-4. **Customization** - All colors and styles are in Tailwind config
-
----
-
-## 🤔 FAQ
 
 **Q: How do I become an admin?**
 A: Currently, admin role must be set directly in the database. Sign up, then update your user document in MongoDB to have `role: "admin"`.
@@ -314,17 +262,3 @@ A: Images are uploaded to ImgBB via their API. URLs are stored in MongoDB.
 - **Issues**: [Report a bug](https://github.com/sinclaire-white/dimen-shop/issues)
 
 ---
-
-## 📄 License
-
-MIT License - feel free to use this for your own projects!
-
----
-
-<div align="center">
-
-**Made with ❤️ for 3D printing enthusiasts**
-
-⭐ Star this project if you find it useful!
-
-</div>
